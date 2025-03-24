@@ -91,6 +91,15 @@
       margin-top: 10px;
       font-size: 20px;
     }
+
+    #music-button {
+      margin-top: 20px;
+      padding: 10px;
+      background-color: #ffcc00;
+      border: none;
+      cursor: pointer;
+      font-size: 16px;
+    }
   </style>
 </head>
 <body>
@@ -103,10 +112,12 @@
     <button onclick="checkAnswer(false)">Errado</button>
   </div>
   
-  <audio id="bg-music" loop autoplay>
+  <audio id="bg-music" loop>
     <source src="background-music.mp3" type="audio/mpeg">
     Seu navegador não suporta a reprodução de áudio.
   </audio>
+
+  <button id="music-button" onclick="toggleMusic()">Tocar Música</button>
   
   <script>
     const gameContainer = document.getElementById("game-container");
@@ -114,6 +125,7 @@
     const questionText = document.getElementById("question-text");
     const scoreValue = document.getElementById("score-value");
     const bgMusic = document.getElementById("bg-music");
+    const musicButton = document.getElementById("music-button");
     const rows = 10;
     const cols = 10;
     let score = 0;
@@ -123,81 +135,5 @@
       { question: "A independência do Brasil foi proclamada em 1822?", correct: true },
       { question: "A abolição da escravidão no Brasil ocorreu em 1888?", correct: true },
       { question: "A Revolução Francesa começou em 1804?", correct: false },
-      { question: "Dom Pedro II foi o primeiro imperador do Brasil?", correct: false },
-      { question: "A Primeira Guerra Mundial ocorreu entre 1914 e 1918?", correct: true },
-      { question: "A Segunda Guerra Mundial terminou em 1945?", correct: true },
-      { question: "A Guerra Fria foi um conflito armado entre EUA e URSS?", correct: false },
-      { question: "O Tratado de Tordesilhas dividiu o mundo entre Espanha e Portugal?", correct: true }
-    ];
-
-    function updateScore(points) {
-      score += points;
-      scoreValue.innerText = score;
-    }
-
-    function createBoard() {
-      const cells = [];
-      for (let i = 0; i < rows * cols; i++) {
-        const cell = document.createElement("div");
-        cell.classList.add("cell");
-        cell.dataset.id = i;
-        gameContainer.appendChild(cell);
-        cells.push(cell);
-      }
-
-      function placeElements(className, count, symbol) {
-        let placed = 0;
-        while (placed < count) {
-          const index = Math.floor(Math.random() * cells.length);
-          if (!cells[index].classList.contains("bomb") && !cells[index].classList.contains("flag-blue") && !cells[index].classList.contains("hole") && !cells[index].classList.contains("neutral") && !cells[index].classList.contains("snake")) {
-            cells[index].classList.add(className);
-            cells[index].dataset.symbol = symbol;
-            placed++;
-          }
-        }
-      }
-
-      placeElements("bomb", 15, "💣");
-      placeElements("flag-blue", 15, "🚩");
-      placeElements("hole", 5, "🕳️");
-      placeElements("neutral", 4, "⚪");
-      placeElements("snake", 4, "🐍");
-
-      return cells;
-    }
-
-    function handleCellClick(event) {
-      currentCell = event.target;
-      if (currentCell.classList.contains("revealed")) return;
-      currentCell.classList.add("revealed");
-      
-      if (currentCell.classList.contains("bomb")) {
-        currentCell.innerHTML = "💣";
-        alert("Game Over!");
-      } else if (currentCell.classList.contains("flag-blue")) {
-        currentCell.innerHTML = "🚩";
-        let randomQuestion = questions[Math.floor(Math.random() * questions.length)];
-        questionBox.style.display = "block";
-        questionText.innerText = randomQuestion.question;
-        currentCell.dataset.correct = randomQuestion.correct;
-      }
-    }
-
-    function checkAnswer(answer) {
-      questionBox.style.display = "none";
-      if (answer.toString() === currentCell.dataset.correct) {
-        updateScore(10);
-        alert("Resposta correta! +10 pontos");
-      } else {
-        updateScore(-5);
-        alert("Resposta errada! -5 pontos");
-      }
-    }
-
-    const cells = createBoard();
-    cells.forEach((cell) => cell.addEventListener("click", handleCellClick));
-  </script>
-</body>
-</html>
-
+      { question: "Dom Pedro II foi o primeiro imperador do Brasil?", correct
 
