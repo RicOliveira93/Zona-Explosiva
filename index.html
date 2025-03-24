@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Campo Minado - História</title>
+  <title>Zona Explosiva</title>
   <style>
     body {
       font-family: Arial, sans-serif;
@@ -94,7 +94,7 @@
   </style>
 </head>
 <body>
-  <h1>Campo Minado - História</h1>
+  <h1>Zona Explosiva</h1>
   <div id="score">Pontuação: <span id="score-value">0</span></div>
   <div id="game-container"></div>
   <div id="question-box">
@@ -102,16 +102,33 @@
     <button onclick="checkAnswer(true)">Certo</button>
     <button onclick="checkAnswer(false)">Errado</button>
   </div>
-
+  
+  <audio id="bg-music" loop autoplay>
+    <source src="background-music.mp3" type="audio/mpeg">
+    Seu navegador não suporta a reprodução de áudio.
+  </audio>
+  
   <script>
     const gameContainer = document.getElementById("game-container");
     const questionBox = document.getElementById("question-box");
     const questionText = document.getElementById("question-text");
     const scoreValue = document.getElementById("score-value");
+    const bgMusic = document.getElementById("bg-music");
     const rows = 10;
     const cols = 10;
     let score = 0;
     let currentCell;
+
+    const questions = [
+      { question: "A independência do Brasil foi proclamada em 1822?", correct: true },
+      { question: "A abolição da escravidão no Brasil ocorreu em 1888?", correct: true },
+      { question: "A Revolução Francesa começou em 1804?", correct: false },
+      { question: "Dom Pedro II foi o primeiro imperador do Brasil?", correct: false },
+      { question: "A Primeira Guerra Mundial ocorreu entre 1914 e 1918?", correct: true },
+      { question: "A Segunda Guerra Mundial terminou em 1945?", correct: true },
+      { question: "A Guerra Fria foi um conflito armado entre EUA e URSS?", correct: false },
+      { question: "O Tratado de Tordesilhas dividiu o mundo entre Espanha e Portugal?", correct: true }
+    ];
 
     function updateScore(points) {
       score += points;
@@ -128,23 +145,23 @@
         cells.push(cell);
       }
 
-      let placed = 0;
-      function placeElements(className, count) {
+      function placeElements(className, count, symbol) {
         let placed = 0;
         while (placed < count) {
           const index = Math.floor(Math.random() * cells.length);
           if (!cells[index].classList.contains("bomb") && !cells[index].classList.contains("flag-blue") && !cells[index].classList.contains("hole") && !cells[index].classList.contains("neutral") && !cells[index].classList.contains("snake")) {
             cells[index].classList.add(className);
+            cells[index].dataset.symbol = symbol;
             placed++;
           }
         }
       }
 
-      placeElements("bomb", 15);
-      placeElements("flag-blue", 15);
-      placeElements("hole", 5);
-      placeElements("neutral", 4);
-      placeElements("snake", 4);
+      placeElements("bomb", 15, "💣");
+      placeElements("flag-blue", 15, "🚩");
+      placeElements("hole", 5, "🕳️");
+      placeElements("neutral", 4, "⚪");
+      placeElements("snake", 4, "🐍");
 
       return cells;
     }
@@ -158,20 +175,17 @@
         currentCell.innerHTML = "💣";
         alert("Game Over!");
       } else if (currentCell.classList.contains("flag-blue")) {
+        currentCell.innerHTML = "🚩";
+        let randomQuestion = questions[Math.floor(Math.random() * questions.length)];
         questionBox.style.display = "block";
-        questionText.innerText = "A independência do Brasil foi proclamada em 1822?";
-      } else if (currentCell.classList.contains("hole")) {
-        alert("Você caiu em um buraco! Perde a vez.");
-      } else if (currentCell.classList.contains("neutral")) {
-        alert("Zona neutra. Nada acontece.");
-      } else if (currentCell.classList.contains("snake")) {
-        alert("A cobra está fumando! Você recebe uma dica.");
+        questionText.innerText = randomQuestion.question;
+        currentCell.dataset.correct = randomQuestion.correct;
       }
     }
 
-    function checkAnswer(correct) {
+    function checkAnswer(answer) {
       questionBox.style.display = "none";
-      if (correct) {
+      if (answer.toString() === currentCell.dataset.correct) {
         updateScore(10);
         alert("Resposta correta! +10 pontos");
       } else {
@@ -185,4 +199,5 @@
   </script>
 </body>
 </html>
+
 
