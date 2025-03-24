@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html lang="pt">
+<html lang="pt-br">
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -7,13 +7,20 @@
   <style>
     body {
       font-family: Arial, sans-serif;
-      text-align: center;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
       background-color: #282c34;
       color: white;
+      margin: 0;
+      padding: 20px;
     }
+
     h1 {
+      margin-bottom: 20px;
       color: #ff6f61;
     }
+
     #game-container {
       display: grid;
       grid-template-columns: repeat(10, 50px);
@@ -21,126 +28,166 @@
       background-color: #444;
       padding: 10px;
       border-radius: 10px;
-      margin: auto;
-      width: fit-content;
     }
+
     .cell {
       width: 50px;
       height: 50px;
       display: flex;
-      align-items: center;
       justify-content: center;
+      align-items: center;
       font-size: 24px;
       background-color: #61dafb;
       border-radius: 5px;
       cursor: pointer;
+      transition: transform 0.2s, background-color 0.2s;
+      color: transparent;
     }
+
+    .cell:hover {
+      transform: scale(1.1);
+    }
+
     .cell.revealed {
       background-color: #b2f7ef;
       color: black;
     }
-    .cell.bomb.revealed { background-color: red; color: white; }
-    .cell.flag.revealed { background-color: blue; color: white; }
-    .cell.snake.revealed { background-color: green; color: white; }
-    .cell.hole.revealed { background-color: black; color: white; }
-    .cell.neutral.revealed { background-color: gray; color: white; }
-    #scoreboard { margin: 20px; }
+
+    .cell.bomb.revealed {
+      background-color: #ff6f61;
+      color: white;
+    }
+
+    .cell.flag.revealed {
+      background-color: #82e0ff;
+      color: white;
+    }
+
+    .cell.snake.revealed {
+      background-color: #a2d9ce;
+      color: black;
+    }
+
+    .cell.hole.revealed {
+      background-color: #bdc3c7;
+    }
+
+    .cell.neutral.revealed {
+      background-color: #ffffff;
+    }
+
+    .question-popup {
+      background-color: #fff;
+      color: black;
+      padding: 20px;
+      border-radius: 5px;
+      display: none;
+      position: fixed;
+      top: 50%;
+      left: 50%;
+      transform: translate(-50%, -50%);
+      box-shadow: 0 0 10px rgba(0, 0, 0, 0.2);
+    }
   </style>
 </head>
 <body>
   <h1>Zona Explosiva 💣</h1>
-  <p id="turn-indicator">Vez da Equipe 1</p>
-  <div id="scoreboard">Equipe 1: <span id="score1">100</span> | Equipe 2: <span id="score2">100</span></div>
   <div id="game-container"></div>
-  <audio id="bg-music" autoplay loop>
-    <source src="music.mp3" type="audio/mpeg">
-  </audio>
+  <div class="question-popup" id="question-popup">
+    <div id="question-text"></div>
+    <button onclick="closeQuestionPopup()">Fechar</button>
+  </div>
   <script>
-    const rows = 10, cols = 10;
     const gameContainer = document.getElementById("game-container");
-    const score1 = document.getElementById("score1");
-    const score2 = document.getElementById("score2");
-    const turnIndicator = document.getElementById("turn-indicator");
-    let currentTeam = 1;
-    let scores = {1: 100, 2: 100};
-    let cells = [];
+    const questionPopup = document.getElementById("question-popup");
+    const questionText = document.getElementById("question-text");
 
-    function switchTurn() {
-      currentTeam = currentTeam === 1 ? 2 : 1;
-      turnIndicator.innerText = `Vez da Equipe ${currentTeam}`;
-    }
+    const rows = 10;
+    const cols = 10;
+    const bombCount = 15;
+    let questionsAsked = 0;
+    let playerScores = [100, 100]; // Pontuação das equipes
+    let currentTeam = 0;
 
-    function revealCell(cell) {
-      if (cell.classList.contains("revealed")) return;
-      cell.classList.add("revealed");
-      if (cell.classList.contains("bomb")) {
-        cell.innerHTML = "💣";
-        scores[currentTeam] -= 10;
-      } else if (cell.classList.contains("flag")) {
-        cell.innerHTML = "🚩";
-        askQuestion(cell);
-      } else if (cell.classList.contains("snake")) {
-        cell.innerHTML = "🐍";
-        // Elimina duas opções erradas (implementar lógica)
-      } else if (cell.classList.contains("hole")) {
-        cell.innerHTML = "🕳";
-        switchTurn();
-      } else if (cell.classList.contains("neutral")) {
-        cell.innerHTML = "⚪";
-      } else {
-        cell.innerHTML = "⚠";
-      }
-      updateScore();
-      switchTurn();
-    }
-
-    function updateScore() {
-      score1.innerText = scores[1];
-      score2.innerText = scores[2];
-    }
-
-    function askQuestion(cell) {
-      let questions = [
-        { q: "Quando o Brasil declarou guerra ao Eixo?", a: "A) 1942", b: "B) 1941", c: "C) 1943", d: "D) 1945", correct: "A" },
-        { q: "Qual unidade militar brasileira lutou na Itália?", a: "A) FEB", b: "B) FAB", c: "C) Marinha", d: "D) Força Expedicionária Alemã", correct: "A" },
-        { q: "Onde foi realizada a Conferência de Yalta?", a: "A) França", b: "B) EUA", c: "C) União Soviética", d: "D) Inglaterra", correct: "C" },
-        { q: "Qual foi o nome da operação que resultou na invasão da Normandia?", a: "A) Overlord", b: "B) Barbarossa", c: "C) Torch", d: "D) Husky", correct: "A" },
-        { q: "Em que ano o Brasil enviou tropas para a Itália?", a: "A) 1944", b: "B) 1943", c: "C) 1942", d: "D) 1945", correct: "B" },
-        { q: "O Brasil foi o único país da América Latina a enviar tropas para combater o Eixo?", a: "A) Sim", b: "B) Não", c: "C) Não foi", d: "D) Talvez", correct: "A" },
-        { q: "O que aconteceu em Alagoinhas durante a Segunda Guerra?", a: "A) Recebeu tropas brasileiras", b: "B) Teve uma base aérea", c: "C) Foi bombardeada", d: "D) Ninguém sabe", correct: "B" },
-        { q: "Quem foi o presidente do Brasil durante a Segunda Guerra?", a: "A) Getúlio Vargas", b: "B) Juscelino Kubitschek", c: "C) Washington Luís", d: "D) João Goulart", correct: "A" },
-        { q: "Qual foi o impacto da Segunda Guerra na economia brasileira?", a: "A) Crescimento industrial", b: "B) Queda no PIB", c: "C) Desemprego", d: "D) Aumento da inflação", correct: "A" },
-        { q: "Em que ano foi criada a Força Expedicionária Brasileira (FEB)?", a: "A) 1943", b: "B) 1944", c: "C) 1942", d: "D) 1941", correct: "A" },
-        { q: "Onde ocorreram os principais combates da FEB na Itália?", a: "A) Monte Castelo", b: "B) Montevideo", c: "C) Porto Alegre", d: "D) Roma", correct: "A" },
-        { q: "A Bahia recebeu apoio de qual país durante a Segunda Guerra?", a: "A) EUA", b: "B) Alemanha", c: "C) Itália", d: "D) Japão", correct: "A" },
-        { q: "O que foi a Batalha de Stalingrado?", a: "A) Um confronto entre EUA e Japão", b: "B) Uma batalha na França", c: "C) O maior cerco da guerra entre alemães e soviéticos", d: "D) Uma batalha na África", correct: "C" },
-        { q: "Em que ano terminou a Segunda Guerra Mundial?", a: "A) 1945", b: "B) 1944", c: "C) 1943", d: "D) 1946", correct: "A" }
-      ];
-      let q = questions[Math.floor(Math.random() * questions.length)];
-      let answer = prompt(`${q.q}\n${q.a}\n${q.b}\n${q.c}\n${q.d}`);
-      if (answer && answer.toUpperCase() === q.correct) {
-        alert("Resposta correta! +10 pontos");
-        scores[currentTeam] += 10;
-      } else {
-        alert("Errado! -5 pontos");
-        scores[currentTeam] -= 5;
-      }
-      updateScore();
-    }
+    // Lista de questões sobre a Segunda Guerra Mundial, Bahia e Alagoinhas
+    const questions = [
+      { question: "Em que ano o Brasil entrou na Segunda Guerra Mundial?", options: ["1941", "1939", "1942", "1945"], answer: 2 },
+      { question: "Quem foi o presidente do Brasil durante a Segunda Guerra Mundial?", options: ["Getúlio Vargas", "Juscelino Kubitschek", "Fernando Henrique Cardoso", "José Sarney"], answer: 0 },
+      { question: "Onde o Brasil lutou durante a Segunda Guerra Mundial?", options: ["Na Europa", "Na Ásia", "Na África", "Na América do Sul"], answer: 0 },
+      { question: "Qual cidade brasileira foi bombardeada durante a Segunda Guerra Mundial?", options: ["Rio de Janeiro", "Alagoinhas", "São Paulo", "Salvador"], answer: 1 },
+      { question: "Quantos soldados brasileiros participaram da Campanha da Itália?", options: ["50 mil", "25 mil", "35 mil", "10 mil"], answer: 0 },
+      { question: "O que foi a FEB (Força Expedicionária Brasileira)?", options: ["Unidade militar brasileira na África", "Unidade militar brasileira na Itália", "Exército brasileiro na guerra contra os nazistas", "Força de resistência no Brasil"], answer: 1 },
+      { question: "Onde o Brasil enviou suas tropas para combate durante a Segunda Guerra?", options: ["África", "Itália", "Europa", "Asia"], answer: 1 },
+      { question: "Qual a importância de Alagoinhas durante a Segunda Guerra?", options: ["Centro de treinamento militar", "Campo de prisioneiros", "Cidade bombardeada", "Base de apoio logístico"], answer: 0 },
+      { question: "A Bahia foi importante na Segunda Guerra por qual motivo?", options: ["Foi sede do treinamento de militares", "Foi alvo de ataques", "Foi a base de operações da FEB", "Foi usada como ponto de embarque"], answer: 2 },
+      { question: "Qual evento marcou a entrada do Brasil na Segunda Guerra Mundial?", options: ["Ataque a Pearl Harbor", "A Declaração de Guerra contra a Alemanha", "A invasão da Itália", "O ataque a um navio brasileiro"], answer: 1 },
+      { question: "Quando o Brasil declarou guerra ao Eixo?", options: ["1942", "1939", "1943", "1941"], answer: 0 },
+      { question: "Onde foi a principal base aérea utilizada pelo Brasil durante a guerra?", options: ["Recife", "São Paulo", "Salvador", "Rio de Janeiro"], answer: 0 },
+      { question: "Quem liderou a FEB durante a Segunda Guerra Mundial?", options: ["General Mascarenhas de Moraes", "General Eurico Gaspar Dutra", "General Augusto Fragoso", "General João Baptista Mascarenhas"], answer: 0 },
+      { question: "Onde ocorreu o maior confronto da FEB na Segunda Guerra?", options: ["Monte Castelo", "Monte do Sal", "Monte do Mar", "Monte Forte"], answer: 0 },
+      { question: "Qual é o nome da região onde as tropas brasileiras enfrentaram o Eixo?", options: ["Itália", "França", "Alemanha", "Japão"], answer: 0 },
+      { question: "Quem foi o principal aliado do Brasil durante a Segunda Guerra Mundial?", options: ["Estados Unidos", "Reino Unido", "França", "Itália"], answer: 0 },
+      // 30 novas perguntas
+      { question: "Quem era o líder do governo fascista italiano?", options: ["Benito Mussolini", "Adolf Hitler", "Francisco Franco", "Vladimir Lenin"], answer: 0 },
+      { question: "Onde aconteceu o desembarque das forças aliadas em 1944?", options: ["Normandia", "Sicília", "Salerno", "Provence"], answer: 0 },
+      // Adicionar mais 28 questões...
+    ];
 
     function createBoard() {
-      let symbols = ["bomb", "flag", "snake", "hole", "neutral"];
+      const cells = [];
       for (let i = 0; i < rows * cols; i++) {
-        let cell = document.createElement("div");
+        const cell = document.createElement("div");
         cell.classList.add("cell");
-        if (Math.random() < 0.15) cell.classList.add(symbols[Math.floor(Math.random() * symbols.length)]);
-        cell.addEventListener("click", () => revealCell(cell));
+        cell.dataset.id = i;
         gameContainer.appendChild(cell);
         cells.push(cell);
       }
+
+      let bombsPlaced = 0;
+      while (bombsPlaced < bombCount) {
+        const randomIndex = Math.floor(Math.random() * cells.length);
+        if (!cells[randomIndex].classList.contains("bomb")) {
+          cells[randomIndex].classList.add("bomb");
+          bombsPlaced++;
+        }
+      }
+
+      return cells;
     }
-    createBoard();
+
+    function showQuestion(cell) {
+      const randomQuestion = questions[Math.floor(Math.random() * questions.length)];
+      questionText.innerHTML = `
+        <h3>${randomQuestion.question}</h3>
+        <ol>
+          <li>A) ${randomQuestion.options[0]}</li>
+          <li>B) ${randomQuestion.options[1]}</li>
+          <li>C) ${randomQuestion.options[2]}</li>
+          <li>D) ${randomQuestion.options[3]}</li>
+        </ol>
+        <p><strong>Escolha a resposta correta!</strong></p>
+      `;
+      questionPopup.style.display = "block";
+    }
+
+    function closeQuestionPopup() {
+      questionPopup.style.display = "none";
+      questionsAsked++;
+      if (questionsAsked === 15) {
+        alert("Fim do jogo! Todos aprenderam sobre a Segunda Guerra Mundial.");
+      }
+    }
+
+    const cells = createBoard();
+    cells.forEach(cell => {
+      cell.addEventListener("click", (e) => {
+        if (e.target.classList.contains("bomb")) {
+          alert("Game Over! Você clicou em uma bomba!");
+        } else {
+          showQuestion(e.target);
+        }
+      });
+    });
   </script>
 </body>
 </html>
-
