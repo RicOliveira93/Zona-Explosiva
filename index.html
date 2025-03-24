@@ -1,9 +1,9 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="pt">
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Campo Minado 💣</title>
+  <title>Campo Minado - História</title>
   <style>
     body {
       font-family: Arial, sans-serif;
@@ -15,9 +15,12 @@
       margin: 0;
       padding: 20px;
     }
+
     h1 {
-      color: #ff6f61;
+      margin-bottom: 20px;
+      color: #ffcc00;
     }
+
     #game-container {
       display: grid;
       grid-template-columns: repeat(10, 50px);
@@ -26,60 +29,160 @@
       padding: 10px;
       border-radius: 10px;
     }
+
     .cell {
       width: 50px;
       height: 50px;
       display: flex;
       justify-content: center;
       align-items: center;
-      font-size: 24px;
+      font-size: 18px;
       background-color: #61dafb;
       border-radius: 5px;
       cursor: pointer;
       transition: transform 0.2s, background-color 0.2s;
       color: transparent;
     }
+
     .cell:hover {
       transform: scale(1.1);
     }
+
     .cell.revealed {
       background-color: #b2f7ef;
       color: black;
     }
+
     .cell.bomb.revealed {
-      background-color: red;
+      background-color: #ff0000;
       color: white;
     }
-    .cell.blue-flag.revealed {
-      background-color: blue;
+
+    .cell.flag-blue.revealed {
+      background-color: #007bff;
       color: white;
     }
-    .cell.white-flag.revealed {
-      background-color: white;
+
+    .cell.hole.revealed {
+      background-color: #333;
+      color: white;
+    }
+
+    .cell.neutral.revealed {
+      background-color: #ccc;
       color: black;
     }
-    .cell.hole.revealed {
-      background-color: black;
-    }
-    .cell.cobra.revealed {
-      background-color: green;
+
+    .cell.snake.revealed {
+      background-color: #228B22;
       color: white;
+    }
+
+    #question-box {
+      margin-top: 20px;
+      padding: 10px;
+      background-color: white;
+      color: black;
+      border-radius: 5px;
+      display: none;
+    }
+
+    #score {
+      margin-top: 10px;
+      font-size: 20px;
     }
   </style>
 </head>
 <body>
-  <h1>Campo Minado 💣</h1>
+  <h1>Campo Minado - História</h1>
+  <div id="score">Pontuação: <span id="score-value">0</span></div>
   <div id="game-container"></div>
+  <div id="question-box">
+    <p id="question-text"></p>
+    <button onclick="checkAnswer(true)">Certo</button>
+    <button onclick="checkAnswer(false)">Errado</button>
+  </div>
+
   <script>
     const gameContainer = document.getElementById("game-container");
+    const questionBox = document.getElementById("question-box");
+    const questionText = document.getElementById("question-text");
+    const scoreValue = document.getElementById("score-value");
     const rows = 10;
     const cols = 10;
-    const bombCount = 15;
-    const blueFlagCount = 15;
-    const holeCount = 5;
-    const whiteFlagCount = 4;
-    const cobraCount = 4;
     let score = 0;
-    let hintAvailable = false;
+    let currentCell;
 
-    function createBoar
+    function updateScore(points) {
+      score += points;
+      scoreValue.innerText = score;
+    }
+
+    function createBoard() {
+      const cells = [];
+      for (let i = 0; i < rows * cols; i++) {
+        const cell = document.createElement("div");
+        cell.classList.add("cell");
+        cell.dataset.id = i;
+        gameContainer.appendChild(cell);
+        cells.push(cell);
+      }
+
+      let placed = 0;
+      function placeElements(className, count) {
+        let placed = 0;
+        while (placed < count) {
+          const index = Math.floor(Math.random() * cells.length);
+          if (!cells[index].classList.contains("bomb") && !cells[index].classList.contains("flag-blue") && !cells[index].classList.contains("hole") && !cells[index].classList.contains("neutral") && !cells[index].classList.contains("snake")) {
+            cells[index].classList.add(className);
+            placed++;
+          }
+        }
+      }
+
+      placeElements("bomb", 15);
+      placeElements("flag-blue", 15);
+      placeElements("hole", 5);
+      placeElements("neutral", 4);
+      placeElements("snake", 4);
+
+      return cells;
+    }
+
+    function handleCellClick(event) {
+      currentCell = event.target;
+      if (currentCell.classList.contains("revealed")) return;
+      currentCell.classList.add("revealed");
+      
+      if (currentCell.classList.contains("bomb")) {
+        currentCell.innerHTML = "💣";
+        alert("Game Over!");
+      } else if (currentCell.classList.contains("flag-blue")) {
+        questionBox.style.display = "block";
+        questionText.innerText = "A independência do Brasil foi proclamada em 1822?";
+      } else if (currentCell.classList.contains("hole")) {
+        alert("Você caiu em um buraco! Perde a vez.");
+      } else if (currentCell.classList.contains("neutral")) {
+        alert("Zona neutra. Nada acontece.");
+      } else if (currentCell.classList.contains("snake")) {
+        alert("A cobra está fumando! Você recebe uma dica.");
+      }
+    }
+
+    function checkAnswer(correct) {
+      questionBox.style.display = "none";
+      if (correct) {
+        updateScore(10);
+        alert("Resposta correta! +10 pontos");
+      } else {
+        updateScore(-5);
+        alert("Resposta errada! -5 pontos");
+      }
+    }
+
+    const cells = createBoard();
+    cells.forEach((cell) => cell.addEventListener("click", handleCellClick));
+  </script>
+</body>
+</html>
+
