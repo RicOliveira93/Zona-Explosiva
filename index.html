@@ -102,7 +102,19 @@
     function askQuestion(cell) {
       let questions = [
         { q: "Quando o Brasil declarou guerra ao Eixo?", a: "A) 1942", b: "B) 1941", c: "C) 1943", d: "D) 1945", correct: "A" },
-        { q: "Qual unidade militar brasileira lutou na Itália?", a: "A) FEB", b: "B) FAB", c: "C) Marinha", d: "D) Força Expedicionária Alemã", correct: "A" }
+        { q: "Qual unidade militar brasileira lutou na Itália?", a: "A) FEB", b: "B) FAB", c: "C) Marinha", d: "D) Força Expedicionária Alemã", correct: "A" },
+        { q: "Onde foi realizada a Conferência de Yalta?", a: "A) França", b: "B) EUA", c: "C) União Soviética", d: "D) Inglaterra", correct: "C" },
+        { q: "Qual foi o nome da operação que resultou na invasão da Normandia?", a: "A) Overlord", b: "B) Barbarossa", c: "C) Torch", d: "D) Husky", correct: "A" },
+        { q: "Em que ano o Brasil enviou tropas para a Itália?", a: "A) 1944", b: "B) 1943", c: "C) 1942", d: "D) 1945", correct: "B" },
+        { q: "O Brasil foi o único país da América Latina a enviar tropas para combater o Eixo?", a: "A) Sim", b: "B) Não", c: "C) Não foi", d: "D) Talvez", correct: "A" },
+        { q: "O que aconteceu em Alagoinhas durante a Segunda Guerra?", a: "A) Recebeu tropas brasileiras", b: "B) Teve uma base aérea", c: "C) Foi bombardeada", d: "D) Ninguém sabe", correct: "B" },
+        { q: "Quem foi o presidente do Brasil durante a Segunda Guerra?", a: "A) Getúlio Vargas", b: "B) Juscelino Kubitschek", c: "C) Washington Luís", d: "D) João Goulart", correct: "A" },
+        { q: "Qual foi o impacto da Segunda Guerra na economia brasileira?", a: "A) Crescimento industrial", b: "B) Queda no PIB", c: "C) Desemprego", d: "D) Aumento da inflação", correct: "A" },
+        { q: "Em que ano foi criada a Força Expedicionária Brasileira (FEB)?", a: "A) 1943", b: "B) 1944", c: "C) 1942", d: "D) 1941", correct: "A" },
+        { q: "Onde ocorreram os principais combates da FEB na Itália?", a: "A) Monte Castelo", b: "B) Montevideo", c: "C) Porto Alegre", d: "D) Roma", correct: "A" },
+        { q: "A Bahia recebeu apoio de qual país durante a Segunda Guerra?", a: "A) EUA", b: "B) Alemanha", c: "C) Itália", d: "D) Japão", correct: "A" },
+        { q: "O que foi a Batalha de Stalingrado?", a: "A) Um confronto entre EUA e Japão", b: "B) Uma batalha na França", c: "C) O maior cerco da guerra entre alemães e soviéticos", d: "D) Uma batalha na África", correct: "C" },
+        { q: "Em que ano terminou a Segunda Guerra Mundial?", a: "A) 1945", b: "B) 1944", c: "C) 1943", d: "D) 1946", correct: "A" }
       ];
       let q = questions[Math.floor(Math.random() * questions.length)];
       let answer = prompt(`${q.q}\n${q.a}\n${q.b}\n${q.c}\n${q.d}`);
@@ -131,3 +143,4 @@
   </script>
 </body>
 </html>
+
