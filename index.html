@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Campo Minado 💣</title>
+  <title>Zoan Explosiva 💣</title>
   <style>
     body {
       font-family: Arial, sans-serif;
@@ -50,17 +50,20 @@
       background-color: red;
       color: white;
     }
-    .blue-flag {
+    .blue-flag.revealed {
       background-color: blue;
+      color: white;
     }
-    .white-flag {
+    .white-flag.revealed {
       background-color: white;
+      color: black;
     }
-    .hole {
+    .hole.revealed {
       background-color: black;
     }
-    .cobra {
+    .cobra.revealed {
       background-color: green;
+      color: white;
     }
     #score {
       margin-top: 10px;
@@ -86,6 +89,7 @@
     const cobraCount = 4;
     let score = 0;
     let cells = [];
+    let hintAvailable = false;
 
     function updateScore(value) {
       score += value;
@@ -95,6 +99,7 @@
     function createBoard() {
       gameContainer.innerHTML = "";
       score = 0;
+      hintAvailable = false;
       updateScore(0);
       cells = [];
       let specialCells = new Set();
@@ -136,14 +141,21 @@
       } else if (cell.classList.contains("hole")) {
         alert("Você caiu em um buraco! Perde a vez.");
       } else if (cell.classList.contains("cobra")) {
-        alert("A Cobra Fumou! Você recebe uma dica na próxima questão.");
+        alert("A Cobra Fumou! Você receberá uma dica na próxima questão.");
+        hintAvailable = true;
       }
     }
 
     function askQuestion(cell) {
       const question = "Qual é a capital do Brasil?";
-      const options = ["A) Rio de Janeiro", "B) São Paulo", "C) Brasília", "D) Salvador"];
+      let options = ["A) Rio de Janeiro", "B) São Paulo", "C) Brasília", "D) Salvador"];
       const answer = "C";
+      
+      if (hintAvailable) {
+        options = options.filter(opt => opt.startsWith(answer) || Math.random() > 0.5);
+        hintAvailable = false;
+      }
+      
       let userAnswer = prompt(question + "\n" + options.join("\n"));
       
       if (userAnswer && userAnswer.toUpperCase() === answer) {
@@ -160,4 +172,3 @@
   </script>
 </body>
 </html>
-
