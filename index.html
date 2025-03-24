@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html lang="pt-BR">
+<html lang="en">
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -21,23 +21,9 @@
       color: #ff6f61;
     }
 
-    #scoreboard {
-      display: flex;
-      justify-content: space-around;
-      width: 300px;
-      margin-bottom: 20px;
-      font-size: 18px;
-    }
-
-    #turn-indicator {
-      margin-bottom: 10px;
-      font-size: 20px;
-      font-weight: bold;
-    }
-
     #game-container {
       display: grid;
-      grid-template-columns: 30px repeat(10, 50px);
+      grid-template-columns: repeat(10, 50px);
       grid-gap: 5px;
       background-color: #444;
       padding: 10px;
@@ -72,39 +58,23 @@
       color: white;
     }
 
-    .cell.empty.revealed {
-      background-color: #ffcc00;
-      color: black;
-    }
-
-    .symbol {
-      font-size: 24px;
+    .cell.flag {
+      background-color: blue;
+      color: white;
     }
   </style>
 </head>
 <body>
   <h1>Zona Explosiva 💣</h1>
-  <audio autoplay loop>
-    <source src="musica.mp3" type="audio/mpeg">
-    Seu navegador não suporta áudio.
-  </audio>
-  <div id="scoreboard">
-    <div>Equipe 1: <span id="score-team-1">100</span> pontos</div>
-    <div>Equipe 2: <span id="score-team-2">100</span> pontos</div>
-  </div>
-  <div id="turn-indicator">Vez da Equipe 1</div>
   <div id="game-container"></div>
   <script>
-    let currentTeam = 1;
-    let scores = { 1: 100, 2: 100 };
-
     const gameContainer = document.getElementById("game-container");
-    const scoreTeam1 = document.getElementById("score-team-1");
-    const scoreTeam2 = document.getElementById("score-team-2");
-    const turnIndicator = document.getElementById("turn-indicator");
     const rows = 10;
     const cols = 10;
     const bombCount = 15;
+    const flagCount = 15;
+    let currentTeam = 1;
+    let teamScores = { 1: 100, 2: 100 };
 
     function createBoard() {
       const cells = [];
@@ -121,10 +91,19 @@
         const randomIndex = Math.floor(Math.random() * cells.length);
         if (!cells[randomIndex].classList.contains("bomb")) {
           cells[randomIndex].classList.add("bomb");
-          cells[randomIndex].innerHTML = "💣";
           bombsPlaced++;
         }
       }
+
+      let flagsPlaced = 0;
+      while (flagsPlaced < flagCount) {
+        const randomIndex = Math.floor(Math.random() * cells.length);
+        if (!cells[randomIndex].classList.contains("bomb") && !cells[randomIndex].classList.contains("flag")) {
+          cells[randomIndex].classList.add("flag");
+          flagsPlaced++;
+        }
+      }
+
       return cells;
     }
 
@@ -133,28 +112,41 @@
       if (cell.classList.contains("revealed")) return;
 
       cell.classList.add("revealed");
+
       if (cell.classList.contains("bomb")) {
         cell.innerHTML = "💣";
-        scores[currentTeam] -= 5;
-        updateScoreboard();
         alert("Game Over!");
-      } else {
-        cell.classList.add("empty");
-        cell.innerHTML = "⚠️";
-        scores[currentTeam] += 10;
-        updateScoreboard();
+      } else if (cell.classList.contains("flag")) {
+        askQuestion(cell);
       }
-      switchTurn();
     }
 
-    function updateScoreboard() {
-      scoreTeam1.textContent = scores[1];
-      scoreTeam2.textContent = scores[2];
-    }
+    function askQuestion(cell) {
+      const questions = [
+        { q: "Em que ano o Brasil declarou guerra contra o Eixo?", a: "B", options: ["A) 1941", "B) 1942", "C) 1943", "D) 1944"] },
+        { q: "Qual era o nome da força expedicionária brasileira?", a: "C", options: ["A) Força Tática", "B) Divisão Brasileira", "C) FEB", "D) Brigada Nacional"] },
+        { q: "Qual cidade baiana foi bombardeada por submarinos alemães?", a: "D", options: ["A) Salvador", "B) Ilhéus", "C) Porto Seguro", "D) Aratu"] },
+        { q: "Quem era o presidente do Brasil durante a Segunda Guerra?", a: "A", options: ["A) Getúlio Vargas", "B) Juscelino Kubitschek", "C) João Goulart", "D) Eurico Gaspar Dutra"] },
+        { q: "Qual o lema dos pracinhas brasileiros?", a: "C", options: ["A) Avante Brasil!", "B) Morrer pela Pátria!", "C) A Cobra Vai Fumar", "D) Vitória ou Morte"] },
+        { q: "Em que país a FEB lutou?", a: "B", options: ["A) França", "B) Itália", "C) Alemanha", "D) Inglaterra"] },
+        { q: "Qual era o principal inimigo do Brasil na Segunda Guerra?", a: "D", options: ["A) Japão", "B) União Soviética", "C) França", "D) Alemanha Nazista"] },
+        { q: "Quantos soldados brasileiros lutaram na Itália?", a: "B", options: ["A) 10.000", "B) 25.000", "C) 50.000", "D) 100.000"] },
+        { q: "Qual cidade italiana foi libertada pela FEB?", a: "C", options: ["A) Roma", "B) Milão", "C) Monte Castelo", "D) Veneza"] },
+        { q: "Qual foi o impacto da guerra na Bahia?", a: "A", options: ["A) Bombardeio de navios", "B) Nenhum", "C) Invasão terrestre", "D) Conflitos internos"] }
+      ];
 
-    function switchTurn() {
+      const randomQuestion = questions[Math.floor(Math.random() * questions.length)];
+      const answer = prompt(randomQuestion.q + "\n" + randomQuestion.options.join("\n"));
+
+      if (answer && answer.toUpperCase() === randomQuestion.a) {
+        alert("Resposta correta! +10 pontos.");
+        teamScores[currentTeam] += 10;
+      } else {
+        alert("Resposta errada! -5 pontos.");
+        teamScores[currentTeam] -= 5;
+      }
+
       currentTeam = currentTeam === 1 ? 2 : 1;
-      turnIndicator.textContent = `Vez da Equipe ${currentTeam}`;
     }
 
     const cells = createBoard();
