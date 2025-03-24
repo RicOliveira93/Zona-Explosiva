@@ -1,232 +1,225 @@
 <!DOCTYPE html>
 <html lang="pt">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Zona Explosiva</title>
-  <style>
-    body {
-      font-family: Arial, sans-serif;
-      display: flex;
-      flex-direction: column;
-      align-items: center;
-      background-color: #282c34;
-      color: white;
-      margin: 0;
-      padding: 20px;
-    }
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Zona Explosiva</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            background-color: #282c34;
+            color: white;
+            margin: 0;
+            padding: 20px;
+        }
 
-    h1 {
-      margin-bottom: 20px;
-      color: #ffcc00;
-    }
+        h1 {
+            margin-bottom: 20px;
+            color: #ffcc00;
+        }
 
-    #game-container {
-      display: grid;
-      grid-template-columns: repeat(10, 50px);
-      grid-gap: 5px;
-      background-color: #444;
-      padding: 10px;
-      border-radius: 10px;
-    }
+        #game-container {
+            display: grid;
+            grid-template-columns: repeat(10, 50px);
+            grid-gap: 5px;
+            background-color: #444;
+            padding: 10px;
+            border-radius: 10px;
+        }
 
-    .cell {
-      width: 50px;
-      height: 50px;
-      display: flex;
-      justify-content: center;
-      align-items: center;
-      font-size: 18px;
-      background-color: #61dafb;
-      border-radius: 5px;
-      cursor: pointer;
-      transition: transform 0.2s, background-color 0.2s;
-      color: transparent;
-    }
+        .cell {
+            width: 50px;
+            height: 50px;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            font-size: 24px;
+            background-color: #61dafb;
+            border-radius: 5px;
+            cursor: pointer;
+            transition: transform 0.2s, background-color 0.2s;
+        }
 
-    .cell:hover {
-      transform: scale(1.1);
-    }
+        .cell:hover {
+            transform: scale(1.1);
+        }
 
-    .cell.revealed {
-      background-color: #b2f7ef;
-      color: black;
-    }
+        .revealed {
+            background-color: #b2f7ef;
+        }
 
-    .cell.bomb.revealed {
-      background-color: #ff0000;
-      color: white;
-    }
+        .bomb.revealed {
+            background-color: red;
+            color: white;
+        }
 
-    .cell.flag-blue.revealed {
-      background-color: #007bff;
-      color: white;
-    }
+        .flag-blue.revealed {
+            background-color: blue;
+            color: white;
+        }
 
-    .cell.hole.revealed {
-      background-color: #333;
-      color: white;
-    }
+        .hole.revealed {
+            background-color: #333;
+            color: white;
+        }
 
-    .cell.neutral.revealed {
-      background-color: #ccc;
-      color: black;
-    }
+        .neutral.revealed {
+            background-color: #ccc;
+            color: black;
+        }
 
-    .cell.snake.revealed {
-      background-color: #228B22;
-      color: white;
-    }
+        .snake.revealed {
+            background-color: green;
+            color: white;
+        }
 
-    #question-box {
-      margin-top: 20px;
-      padding: 10px;
-      background-color: white;
-      color: black;
-      border-radius: 5px;
-      display: none;
-    }
+        #question-box {
+            margin-top: 20px;
+            padding: 10px;
+            background-color: white;
+            color: black;
+            border-radius: 5px;
+            display: none;
+        }
 
-    #score {
-      margin-top: 10px;
-      font-size: 20px;
-    }
+        #score {
+            margin-top: 10px;
+            font-size: 20px;
+        }
 
-    #music-button {
-      margin-top: 20px;
-      padding: 10px;
-      background-color: #ffcc00;
-      border: none;
-      cursor: pointer;
-      font-size: 16px;
-    }
-  </style>
+        #music-button {
+            margin-top: 20px;
+            padding: 10px;
+            background-color: #ffcc00;
+            border: none;
+            cursor: pointer;
+            font-size: 16px;
+        }
+    </style>
 </head>
 <body>
-  <h1>Zona Explosiva</h1>
-  <div id="score">Pontuação: <span id="score-value">0</span></div>
-  <div id="game-container"></div>
-  <div id="question-box">
-    <p id="question-text"></p>
-    <button onclick="checkAnswer(true)">Certo</button>
-    <button onclick="checkAnswer(false)">Errado</button>
-  </div>
-  
-  <audio id="bg-music" loop>
-    <source src="background-music.mp3" type="audio/mpeg">
-    Seu navegador não suporta a reprodução de áudio.
-  </audio>
+    <h1>Zona Explosiva</h1>
+    <div id="score">Pontuação: <span id="score-value">0</span></div>
+    <div id="game-container"></div>
+    <div id="question-box">
+        <p id="question-text"></p>
+        <button onclick="checkAnswer(true)">Certo</button>
+        <button onclick="checkAnswer(false)">Errado</button>
+    </div>
 
-  <button id="music-button" onclick="toggleMusic()">Tocar Música</button>
-  
-  <script>
-    const gameContainer = document.getElementById("game-container");
-    const questionBox = document.getElementById("question-box");
-    const questionText = document.getElementById("question-text");
-    const scoreValue = document.getElementById("score-value");
-    const bgMusic = document.getElementById("bg-music");
-    const musicButton = document.getElementById("music-button");
-    const rows = 10;
-    const cols = 10;
-    let score = 0;
-    let currentCell;
+    <audio id="bg-music" loop>
+        <source src="background-music.mp3" type="audio/mpeg">
+        Seu navegador não suporta a reprodução de áudio.
+    </audio>
 
-    const questions = [
-      { question: "A independência do Brasil foi proclamada em 1822?", correct: true },
-      { question: "A abolição da escravidão no Brasil ocorreu em 1888?", correct: true },
-      { question: "A Revolução Francesa começou em 1804?", correct: false },
-      { question: "Dom Pedro II foi o primeiro imperador do Brasil?", correct: false },
-      { question: "A Primeira Guerra Mundial ocorreu entre 1914 e 1918?", correct: true },
-      { question: "A Segunda Guerra Mundial terminou em 1945?", correct: true },
-      { question: "A Guerra Fria foi um conflito armado entre EUA e URSS?", correct: false },
-      { question: "O Tratado de Tordesilhas dividiu o mundo entre Espanha e Portugal?", correct: true }
-    ];
+    <button id="music-button" onclick="toggleMusic()">Tocar Música</button>
 
-    function updateScore(points) {
-      score += points;
-      scoreValue.innerText = score;
-    }
+    <script>
+        const gameContainer = document.getElementById("game-container");
+        const questionBox = document.getElementById("question-box");
+        const questionText = document.getElementById("question-text");
+        const scoreValue = document.getElementById("score-value");
+        const bgMusic = document.getElementById("bg-music");
+        const musicButton = document.getElementById("music-button");
+        const rows = 10;
+        const cols = 10;
+        let score = 0;
+        let currentCell;
 
-    function createBoard() {
-      const cells = [];
-      for (let i = 0; i < rows * cols; i++) {
-        const cell = document.createElement("div");
-        cell.classList.add("cell");
-        cell.dataset.id = i;
-        gameContainer.appendChild(cell);
-        cells.push(cell);
-      }
+        const questions = [
+            { question: "A independência do Brasil foi proclamada em 1822?", correct: true },
+            { question: "A abolição da escravidão no Brasil ocorreu em 1888?", correct: true },
+            { question: "A Revolução Francesa começou em 1804?", correct: false },
+            { question: "Dom Pedro II foi o primeiro imperador do Brasil?", correct: false },
+            { question: "A Primeira Guerra Mundial ocorreu entre 1914 e 1918?", correct: true },
+            { question: "A Segunda Guerra Mundial terminou em 1945?", correct: true },
+            { question: "A Guerra Fria foi um conflito armado entre EUA e URSS?", correct: false },
+            { question: "O Tratado de Tordesilhas dividiu o mundo entre Espanha e Portugal?", correct: true }
+        ];
 
-      function placeElements(className, count, symbol) {
-        let placed = 0;
-        while (placed < count) {
-          const index = Math.floor(Math.random() * cells.length);
-          if (!cells[index].classList.contains("bomb") && !cells[index].classList.contains("flag-blue") && !cells[index].classList.contains("hole") && !cells[index].classList.contains("neutral") && !cells[index].classList.contains("snake")) {
-            cells[index].classList.add(className);
-            cells[index].dataset.symbol = symbol;
-            placed++;
-          }
+        function updateScore(points) {
+            score += points;
+            scoreValue.innerText = score;
         }
-      }
 
-      placeElements("bomb", 15, "💣");
-      placeElements("flag-blue", 15, "🚩");
-      placeElements("hole", 5, "🕳️");
-      placeElements("neutral", 4, "⚪");
-      placeElements("snake", 4, "🐍");
+        function createBoard() {
+            const cells = [];
+            for (let i = 0; i < rows * cols; i++) {
+                const cell = document.createElement("div");
+                cell.classList.add("cell");
+                cell.dataset.id = i;
+                gameContainer.appendChild(cell);
+                cells.push(cell);
+            }
 
-      return cells;
-    }
+            function placeElements(className, count, symbol) {
+                let placed = 0;
+                while (placed < count) {
+                    const index = Math.floor(Math.random() * cells.length);
+                    if (!cells[index].dataset.symbol) {
+                        cells[index].classList.add(className);
+                        cells[index].dataset.symbol = symbol;
+                        placed++;
+                    }
+                }
+            }
 
-    function handleCellClick(event) {
-      currentCell = event.target;
-      if (currentCell.classList.contains("revealed")) return;
-      currentCell.classList.add("revealed");
-      
-      if (currentCell.classList.contains("bomb")) {
-        currentCell.innerHTML = "💣";
-        alert("Game Over!");
-      } else if (currentCell.classList.contains("flag-blue")) {
-        currentCell.innerHTML = "🚩";
-        let randomQuestion = questions[Math.floor(Math.random() * questions.length)];
-        questionBox.style.display = "block";
-        questionText.innerText = randomQuestion.question;
-        currentCell.dataset.correct = randomQuestion.correct;
-      } else if (currentCell.classList.contains("hole")) {
-        currentCell.innerHTML = "🕳️";
-        alert("Você perdeu a vez!");
-      } else if (currentCell.classList.contains("neutral")) {
-        currentCell.innerHTML = "⚪";
-      } else if (currentCell.classList.contains("snake")) {
-        currentCell.innerHTML = "🐍";
-        alert("Você recebeu uma dica! Duas opções erradas foram eliminadas.");
-      }
-    }
+            placeElements("bomb", 15, "💣");
+            placeElements("flag-blue", 15, "🚩");
+            placeElements("hole", 5, "🕳️");
+            placeElements("neutral", 4, "⚪");
+            placeElements("snake", 4, "🐍");
 
-    function checkAnswer(answer) {
-      questionBox.style.display = "none";
-      if (answer.toString() === currentCell.dataset.correct) {
-        updateScore(10);
-        alert("Resposta correta! +10 pontos");
-      } else {
-        updateScore(-5);
-        alert("Resposta errada! -5 pontos");
-      }
-    }
+            return cells;
+        }
 
-    function toggleMusic() {
-      if (bgMusic.paused) {
-        bgMusic.play();
-        musicButton.innerText = "Parar Música";
-      } else {
-        bgMusic.pause();
-        musicButton.innerText = "Tocar Música";
-      }
-    }
+        function handleCellClick(event) {
+            currentCell = event.target;
+            if (currentCell.classList.contains("revealed")) return;
+            currentCell.classList.add("revealed");
+            currentCell.innerHTML = currentCell.dataset.symbol;
 
-    const cells = createBoard();
-    cells.forEach((cell) => cell.addEventListener("click", handleCellClick));
-  </script>
+            if (currentCell.classList.contains("bomb")) {
+                alert("Game Over!");
+            } else if (currentCell.classList.contains("flag-blue")) {
+                let randomQuestion = questions[Math.floor(Math.random() * questions.length)];
+                questionBox.style.display = "block";
+                questionText.innerText = randomQuestion.question;
+                currentCell.dataset.correct = randomQuestion.correct;
+            } else if (currentCell.classList.contains("hole")) {
+                alert("Você perdeu a vez!");
+            } else if (currentCell.classList.contains("snake")) {
+                alert("Você recebeu uma dica! Duas opções erradas foram eliminadas.");
+            }
+        }
+
+        function checkAnswer(answer) {
+            questionBox.style.display = "none";
+            if (answer.toString() === currentCell.dataset.correct) {
+                updateScore(10);
+                alert("Resposta correta! +10 pontos");
+            } else {
+                updateScore(-5);
+                alert("Resposta errada! -5 pontos");
+            }
+        }
+
+        function toggleMusic() {
+            if (bgMusic.paused) {
+                bgMusic.play();
+                musicButton.innerText = "Parar Música";
+            } else {
+                bgMusic.pause();
+                musicButton.innerText = "Tocar Música";
+            }
+        }
+
+        const cells = createBoard();
+        cells.forEach((cell) => cell.addEventListener("click", handleCellClick));
+    </script>
 </body>
 </html>
 
