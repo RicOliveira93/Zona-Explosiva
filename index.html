@@ -1,225 +1,164 @@
 <!DOCTYPE html>
-<html lang="pt">
+<html lang="pt-BR">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Zona Explosiva</title>
-    <style>
-        body {
-            font-family: Arial, sans-serif;
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            background-color: #282c34;
-            color: white;
-            margin: 0;
-            padding: 20px;
-        }
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Zona Explosiva 💣</title>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      background-color: #282c34;
+      color: white;
+      margin: 0;
+      padding: 20px;
+    }
 
-        h1 {
-            margin-bottom: 20px;
-            color: #ffcc00;
-        }
+    h1 {
+      margin-bottom: 20px;
+      color: #ff6f61;
+    }
 
-        #game-container {
-            display: grid;
-            grid-template-columns: repeat(10, 50px);
-            grid-gap: 5px;
-            background-color: #444;
-            padding: 10px;
-            border-radius: 10px;
-        }
+    #scoreboard {
+      display: flex;
+      justify-content: space-around;
+      width: 300px;
+      margin-bottom: 20px;
+      font-size: 18px;
+    }
 
-        .cell {
-            width: 50px;
-            height: 50px;
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            font-size: 24px;
-            background-color: #61dafb;
-            border-radius: 5px;
-            cursor: pointer;
-            transition: transform 0.2s, background-color 0.2s;
-        }
+    #turn-indicator {
+      margin-bottom: 10px;
+      font-size: 20px;
+      font-weight: bold;
+    }
 
-        .cell:hover {
-            transform: scale(1.1);
-        }
+    #game-container {
+      display: grid;
+      grid-template-columns: 30px repeat(10, 50px);
+      grid-gap: 5px;
+      background-color: #444;
+      padding: 10px;
+      border-radius: 10px;
+    }
 
-        .revealed {
-            background-color: #b2f7ef;
-        }
+    .cell {
+      width: 50px;
+      height: 50px;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      font-size: 24px;
+      background-color: #61dafb;
+      border-radius: 5px;
+      cursor: pointer;
+      transition: transform 0.2s, background-color 0.2s;
+      color: transparent;
+    }
 
-        .bomb.revealed {
-            background-color: red;
-            color: white;
-        }
+    .cell:hover {
+      transform: scale(1.1);
+    }
 
-        .flag-blue.revealed {
-            background-color: blue;
-            color: white;
-        }
+    .cell.revealed {
+      background-color: #b2f7ef;
+      color: black;
+    }
 
-        .hole.revealed {
-            background-color: #333;
-            color: white;
-        }
+    .cell.bomb.revealed {
+      background-color: #ff6f61;
+      color: white;
+    }
 
-        .neutral.revealed {
-            background-color: #ccc;
-            color: black;
-        }
+    .cell.empty.revealed {
+      background-color: #ffcc00;
+      color: black;
+    }
 
-        .snake.revealed {
-            background-color: green;
-            color: white;
-        }
-
-        #question-box {
-            margin-top: 20px;
-            padding: 10px;
-            background-color: white;
-            color: black;
-            border-radius: 5px;
-            display: none;
-        }
-
-        #score {
-            margin-top: 10px;
-            font-size: 20px;
-        }
-
-        #music-button {
-            margin-top: 20px;
-            padding: 10px;
-            background-color: #ffcc00;
-            border: none;
-            cursor: pointer;
-            font-size: 16px;
-        }
-    </style>
+    .symbol {
+      font-size: 24px;
+    }
+  </style>
 </head>
 <body>
-    <h1>Zona Explosiva</h1>
-    <div id="score">Pontuação: <span id="score-value">0</span></div>
-    <div id="game-container"></div>
-    <div id="question-box">
-        <p id="question-text"></p>
-        <button onclick="checkAnswer(true)">Certo</button>
-        <button onclick="checkAnswer(false)">Errado</button>
-    </div>
+  <h1>Zona Explosiva 💣</h1>
+  <audio autoplay loop>
+    <source src="musica.mp3" type="audio/mpeg">
+    Seu navegador não suporta áudio.
+  </audio>
+  <div id="scoreboard">
+    <div>Equipe 1: <span id="score-team-1">100</span> pontos</div>
+    <div>Equipe 2: <span id="score-team-2">100</span> pontos</div>
+  </div>
+  <div id="turn-indicator">Vez da Equipe 1</div>
+  <div id="game-container"></div>
+  <script>
+    let currentTeam = 1;
+    let scores = { 1: 100, 2: 100 };
 
-    <audio id="bg-music" loop>
-        <source src="background-music.mp3" type="audio/mpeg">
-        Seu navegador não suporta a reprodução de áudio.
-    </audio>
+    const gameContainer = document.getElementById("game-container");
+    const scoreTeam1 = document.getElementById("score-team-1");
+    const scoreTeam2 = document.getElementById("score-team-2");
+    const turnIndicator = document.getElementById("turn-indicator");
+    const rows = 10;
+    const cols = 10;
+    const bombCount = 15;
 
-    <button id="music-button" onclick="toggleMusic()">Tocar Música</button>
+    function createBoard() {
+      const cells = [];
+      for (let i = 0; i < rows * cols; i++) {
+        const cell = document.createElement("div");
+        cell.classList.add("cell");
+        cell.dataset.id = i;
+        gameContainer.appendChild(cell);
+        cells.push(cell);
+      }
 
-    <script>
-        const gameContainer = document.getElementById("game-container");
-        const questionBox = document.getElementById("question-box");
-        const questionText = document.getElementById("question-text");
-        const scoreValue = document.getElementById("score-value");
-        const bgMusic = document.getElementById("bg-music");
-        const musicButton = document.getElementById("music-button");
-        const rows = 10;
-        const cols = 10;
-        let score = 0;
-        let currentCell;
-
-        const questions = [
-            { question: "A independência do Brasil foi proclamada em 1822?", correct: true },
-            { question: "A abolição da escravidão no Brasil ocorreu em 1888?", correct: true },
-            { question: "A Revolução Francesa começou em 1804?", correct: false },
-            { question: "Dom Pedro II foi o primeiro imperador do Brasil?", correct: false },
-            { question: "A Primeira Guerra Mundial ocorreu entre 1914 e 1918?", correct: true },
-            { question: "A Segunda Guerra Mundial terminou em 1945?", correct: true },
-            { question: "A Guerra Fria foi um conflito armado entre EUA e URSS?", correct: false },
-            { question: "O Tratado de Tordesilhas dividiu o mundo entre Espanha e Portugal?", correct: true }
-        ];
-
-        function updateScore(points) {
-            score += points;
-            scoreValue.innerText = score;
+      let bombsPlaced = 0;
+      while (bombsPlaced < bombCount) {
+        const randomIndex = Math.floor(Math.random() * cells.length);
+        if (!cells[randomIndex].classList.contains("bomb")) {
+          cells[randomIndex].classList.add("bomb");
+          cells[randomIndex].innerHTML = "💣";
+          bombsPlaced++;
         }
+      }
+      return cells;
+    }
 
-        function createBoard() {
-            const cells = [];
-            for (let i = 0; i < rows * cols; i++) {
-                const cell = document.createElement("div");
-                cell.classList.add("cell");
-                cell.dataset.id = i;
-                gameContainer.appendChild(cell);
-                cells.push(cell);
-            }
+    function handleCellClick(event) {
+      const cell = event.target;
+      if (cell.classList.contains("revealed")) return;
 
-            function placeElements(className, count, symbol) {
-                let placed = 0;
-                while (placed < count) {
-                    const index = Math.floor(Math.random() * cells.length);
-                    if (!cells[index].dataset.symbol) {
-                        cells[index].classList.add(className);
-                        cells[index].dataset.symbol = symbol;
-                        placed++;
-                    }
-                }
-            }
+      cell.classList.add("revealed");
+      if (cell.classList.contains("bomb")) {
+        cell.innerHTML = "💣";
+        scores[currentTeam] -= 5;
+        updateScoreboard();
+        alert("Game Over!");
+      } else {
+        cell.classList.add("empty");
+        cell.innerHTML = "⚠️";
+        scores[currentTeam] += 10;
+        updateScoreboard();
+      }
+      switchTurn();
+    }
 
-            placeElements("bomb", 15, "💣");
-            placeElements("flag-blue", 15, "🚩");
-            placeElements("hole", 5, "🕳️");
-            placeElements("neutral", 4, "⚪");
-            placeElements("snake", 4, "🐍");
+    function updateScoreboard() {
+      scoreTeam1.textContent = scores[1];
+      scoreTeam2.textContent = scores[2];
+    }
 
-            return cells;
-        }
+    function switchTurn() {
+      currentTeam = currentTeam === 1 ? 2 : 1;
+      turnIndicator.textContent = `Vez da Equipe ${currentTeam}`;
+    }
 
-        function handleCellClick(event) {
-            currentCell = event.target;
-            if (currentCell.classList.contains("revealed")) return;
-            currentCell.classList.add("revealed");
-            currentCell.innerHTML = currentCell.dataset.symbol;
-
-            if (currentCell.classList.contains("bomb")) {
-                alert("Game Over!");
-            } else if (currentCell.classList.contains("flag-blue")) {
-                let randomQuestion = questions[Math.floor(Math.random() * questions.length)];
-                questionBox.style.display = "block";
-                questionText.innerText = randomQuestion.question;
-                currentCell.dataset.correct = randomQuestion.correct;
-            } else if (currentCell.classList.contains("hole")) {
-                alert("Você perdeu a vez!");
-            } else if (currentCell.classList.contains("snake")) {
-                alert("Você recebeu uma dica! Duas opções erradas foram eliminadas.");
-            }
-        }
-
-        function checkAnswer(answer) {
-            questionBox.style.display = "none";
-            if (answer.toString() === currentCell.dataset.correct) {
-                updateScore(10);
-                alert("Resposta correta! +10 pontos");
-            } else {
-                updateScore(-5);
-                alert("Resposta errada! -5 pontos");
-            }
-        }
-
-        function toggleMusic() {
-            if (bgMusic.paused) {
-                bgMusic.play();
-                musicButton.innerText = "Parar Música";
-            } else {
-                bgMusic.pause();
-                musicButton.innerText = "Tocar Música";
-            }
-        }
-
-        const cells = createBoard();
-        cells.forEach((cell) => cell.addEventListener("click", handleCellClick));
-    </script>
+    const cells = createBoard();
+    cells.forEach((cell) => cell.addEventListener("click", handleCellClick));
+  </script>
 </body>
 </html>
-
