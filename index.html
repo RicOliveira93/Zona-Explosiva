@@ -78,14 +78,14 @@
         scores[currentTeam] -= 10;
       } else if (cell.classList.contains("flag")) {
         cell.innerHTML = "🚩";
-        askQuestion();
+        askQuestion(cell);
       } else if (cell.classList.contains("snake")) {
         cell.innerHTML = "🐍";
       } else if (cell.classList.contains("hole")) {
         cell.innerHTML = "🕳";
         switchTurn();
       } else {
-        cell.innerHTML = "⚠";
+        cell.innerHTML = "⚪";
       }
       updateScore();
       switchTurn();
@@ -96,25 +96,19 @@
       score2.innerText = scores[2];
     }
 
-    function askQuestion() {
-      let allQuestions = [
-        { q: "Quando o Brasil declarou guerra ao Eixo?", a: "A) 1942", b: "B) 1941", c: "C) 1943", d: "D) 1945", correct: "A" },
-        { q: "Qual unidade militar brasileira lutou na Itália?", a: "A) FEB", b: "B) FAB", c: "C) Marinha", d: "D) Força Expedicionária Alemã", correct: "A" },
-        { q: "Onde foi realizada a Conferência de Yalta?", a: "A) França", b: "B) EUA", c: "C) União Soviética", d: "D) Inglaterra", correct: "C" },
-        { q: "Qual foi a maior batalha da Segunda Guerra?", a: "A) Stalingrado", b: "B) Normandia", c: "C) Pearl Harbor", d: "D) Berlim", correct: "A" },
-        { q: "Quem foi o líder da Alemanha na Segunda Guerra?", a: "A) Hitler", b: "B) Mussolini", c: "C) Churchill", d: "D) Stalin", correct: "A" },
-        { q: "O que foi o Dia D?", a: "A) Invasão da Normandia", b: "B) Batalha de Stalingrado", c: "C) Ataque a Pearl Harbor", d: "D) Fim da guerra", correct: "A" },
-        { q: "Qual cidade foi bombardeada com a primeira bomba atômica?", a: "A) Hiroshima", b: "B) Nagasaki", c: "C) Tóquio", d: "D) Berlim", correct: "A" },
-        { q: "O que era o Eixo na Segunda Guerra?", a: "A) Alemanha, Itália e Japão", b: "B) EUA, Reino Unido e França", c: "C) União Soviética e China", d: "D) Brasil, Canadá e Austrália", correct: "A" }
-        { q: "Quando o Brasil declarou guerra ao Eixo?", a: "A) 1942", b: "B) 1941", c: "C) 1943", d: "D) 1945", correct: "A" },
-        { q: "Qual unidade militar brasileira lutou na Itália?", a: "A) FEB", b: "B) FAB", c: "C) Marinha", d: "D) Força Expedicionária Alemã", correct: "A" },
-        { q: "Onde foi realizada a Conferência de Yalta?", a: "A) França", b: "B) EUA", c: "C) União Soviética", d: "D) Inglaterra", correct: "C" },
-        { q: "Qual foi a maior batalha da Segunda Guerra?", a: "A) Stalingrado", b: "B) Normandia", c: "C) Pearl Harbor", d: "D) Berlim", correct: "A" },
-        { q: "Quem foi o líder da Alemanha na Segunda Guerra?", a: "A) Hitler", b: "B) Mussolini", c: "C) Churchill", d: "D) Stalin", correct: "A" },
-        { q: "O que foi o Dia D?", a: "A) Invasão da Normandia", b: "B) Batalha de Stalingrado", c: "C) Ataque a Pearl Harbor", d: "D) Fim da guerra", correct: "A" },
-        { q: "Qual cidade foi bombardeada com a primeira bomba atômica?", a: "A) Hiroshima", b: "B) Nagasaki", c: "C) Tóquio", d: "D) Berlim", correct: "A" },
-        { q: "O que era o Eixo na Segunda Guerra?", a: "A) Alemanha, Itália e Japão", b: "B) EUA, Reino Unido e França", c: "C) União Soviética e China", d: "D) Brasil, Canadá e Austrália", correct: "A" }
-      ];
+    const allQuestions = [
+      { q: "Quando o Brasil declarou guerra ao Eixo?", a: "A) 1942", b: "B) 1941", c: "C) 1943", d: "D) 1945", correct: "A" },
+      { q: "Qual unidade militar brasileira lutou na Itália?", a: "A) FEB", b: "B) FAB", c: "C) Marinha", d: "D) Força Expedicionária Alemã", correct: "A" },
+      { q: "Onde foi realizada a Conferência de Yalta?", a: "A) França", b: "B) EUA", c: "C) União Soviética", d: "D) Inglaterra", correct: "C" },
+      { q: "Qual foi a maior batalha da Segunda Guerra?", a: "A) Stalingrado", b: "B) Normandia", c: "C) Pearl Harbor", d: "D) Berlim", correct: "A" },
+      { q: "Quem foi o líder da Alemanha na Segunda Guerra?", a: "A) Hitler", b: "B) Mussolini", c: "C) Churchill", d: "D) Stalin", correct: "A" },
+      { q: "O que foi o Dia D?", a: "A) Invasão da Normandia", b: "B) Batalha de Stalingrado", c: "C) Ataque a Pearl Harbor", d: "D) Fim da guerra", correct: "A" },
+      { q: "Qual cidade foi bombardeada com a primeira bomba atômica?", a: "A) Hiroshima", b: "B) Nagasaki", c: "C) Tóquio", d: "D) Berlim", correct: "A" },
+      { q: "O que era o Eixo na Segunda Guerra?", a: "A) Alemanha, Itália e Japão", b: "B) EUA, Reino Unido e França", c: "C) União Soviética e China", d: "D) Brasil, Canadá e Austrália", correct: "A" },
+      { q: "Onde ocorreu a maior batalha da FEB?", a: "A) Monte Castelo", b: "B) Berlim", c: "C) Paris", d: "D) Londres", correct: "A" }
+    ];
+    
+    function askQuestion(cell) {
       let selectedQuestions = allQuestions.sort(() => 0.5 - Math.random()).slice(0, 15);
       let q = selectedQuestions[Math.floor(Math.random() * selectedQuestions.length)];
       let answer = prompt(`${q.q}\n${q.a}\n${q.b}\n${q.c}\n${q.d}`);
@@ -140,3 +134,4 @@
   </script>
 </body>
 </html>
+
