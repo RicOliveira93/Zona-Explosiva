@@ -77,13 +77,25 @@
       background-color: gray;
       color: white;
     }
+
+    #scoreboard {
+      margin-top: 20px;
+      font-size: 18px;
+      color: #ff6f61;
+    }
   </style>
 </head>
 <body>
   <h1>Zona Explosiva 💣</h1>
+  <div id="scoreboard">
+    <div>Equipe 1: <span id="team1-score">100</span> pontos</div>
+    <div>Equipe 2: <span id="team2-score">100</span> pontos</div>
+  </div>
   <div id="game-container"></div>
   <script>
     const gameContainer = document.getElementById("game-container");
+    const team1ScoreElement = document.getElementById("team1-score");
+    const team2ScoreElement = document.getElementById("team2-score");
     const rows = 10;
     const cols = 10;
     const questionCount = 15;
@@ -163,7 +175,13 @@
         teamScores[currentTeam] -= 5;
       }
 
+      updateScoreboard();
       currentTeam = currentTeam === 1 ? 2 : 1;
+    }
+
+    function updateScoreboard() {
+      team1ScoreElement.textContent = teamScores[1];
+      team2ScoreElement.textContent = teamScores[2];
     }
 
     const cells = createBoard();
@@ -171,4 +189,5 @@
   </script>
 </body>
 </html>
+
 
