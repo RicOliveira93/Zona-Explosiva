@@ -78,14 +78,14 @@
         scores[currentTeam] -= 10;
       } else if (cell.classList.contains("flag")) {
         cell.innerHTML = "🚩";
-        askQuestion(cell);
+        askQuestion();
       } else if (cell.classList.contains("snake")) {
         cell.innerHTML = "🐍";
       } else if (cell.classList.contains("hole")) {
         cell.innerHTML = "🕳";
         switchTurn();
       } else {
-        cell.innerHTML = "⚪";
+        cell.innerHTML = "⚠";
       }
       updateScore();
       switchTurn();
@@ -97,22 +97,24 @@
     }
 
     const allQuestions = [
-      { q: "Quando o Brasil declarou guerra ao Eixo?", a: "A) 1942", b: "B) 1941", c: "C) 1943", d: "D) 1945", correct: "A" },
-      { q: "Qual unidade militar brasileira lutou na Itália?", a: "A) FEB", b: "B) FAB", c: "C) Marinha", d: "D) Força Expedicionária Alemã", correct: "A" },
-      { q: "Onde foi realizada a Conferência de Yalta?", a: "A) França", b: "B) EUA", c: "C) União Soviética", d: "D) Inglaterra", correct: "C" },
-      { q: "Qual foi a maior batalha da Segunda Guerra?", a: "A) Stalingrado", b: "B) Normandia", c: "C) Pearl Harbor", d: "D) Berlim", correct: "A" },
-      { q: "Quem foi o líder da Alemanha na Segunda Guerra?", a: "A) Hitler", b: "B) Mussolini", c: "C) Churchill", d: "D) Stalin", correct: "A" },
-      { q: "O que foi o Dia D?", a: "A) Invasão da Normandia", b: "B) Batalha de Stalingrado", c: "C) Ataque a Pearl Harbor", d: "D) Fim da guerra", correct: "A" },
-      { q: "Qual cidade foi bombardeada com a primeira bomba atômica?", a: "A) Hiroshima", b: "B) Nagasaki", c: "C) Tóquio", d: "D) Berlim", correct: "A" },
-      { q: "O que era o Eixo na Segunda Guerra?", a: "A) Alemanha, Itália e Japão", b: "B) EUA, Reino Unido e França", c: "C) União Soviética e China", d: "D) Brasil, Canadá e Austrália", correct: "A" },
-      { q: "Onde ocorreu a maior batalha da FEB?", a: "A) Monte Castelo", b: "B) Berlim", c: "C) Paris", d: "D) Londres", correct: "A" }
+      { q: "Quando o Brasil declarou guerra ao Eixo?", options: ["1942", "1941", "1943", "1945"], correct: 0 },
+      { q: "Qual unidade militar brasileira lutou na Itália?", options: ["FEB", "FAB", "Marinha", "Força Expedicionária Alemã"], correct: 0 },
+      { q: "Onde foi realizada a Conferência de Yalta?", options: ["França", "EUA", "União Soviética", "Inglaterra"], correct: 2 },
+      { q: "Qual foi a maior batalha da Segunda Guerra?", options: ["Stalingrado", "Normandia", "Pearl Harbor", "Berlim"], correct: 0 },
+      { q: "Quem foi o líder da Alemanha na Segunda Guerra?", options: ["Hitler", "Mussolini", "Churchill", "Stalin"], correct: 0 },
+      { q: "O que foi o Dia D?", options: ["Invasão da Normandia", "Batalha de Stalingrado", "Ataque a Pearl Harbor", "Fim da guerra"], correct: 0 },
+      { q: "Qual cidade foi bombardeada com a primeira bomba atômica?", options: ["Hiroshima", "Nagasaki", "Tóquio", "Berlim"], correct: 0 },
+      { q: "O que era o Eixo na Segunda Guerra?", options: ["Alemanha, Itália e Japão", "EUA, Reino Unido e França", "União Soviética e China", "Brasil, Canadá e Austrália"], correct: 0 },
+      { q: "Em que ano o Brasil entrou na Segunda Guerra Mundial?", options: ["1941", "1939", "1942", "1945"], correct: 2 },
+      { q: "Quem foi o presidente do Brasil durante a Segunda Guerra Mundial?", options: ["Getúlio Vargas", "Juscelino Kubitschek", "Fernando Henrique Cardoso", "José Sarney"], correct: 0 }
     ];
-    
-    function askQuestion(cell) {
-      let selectedQuestions = allQuestions.sort(() => 0.5 - Math.random()).slice(0, 15);
-      let q = selectedQuestions[Math.floor(Math.random() * selectedQuestions.length)];
-      let answer = prompt(`${q.q}\n${q.a}\n${q.b}\n${q.c}\n${q.d}`);
-      if (answer && answer.toUpperCase() === q.correct) {
+
+    const selectedQuestions = allQuestions.sort(() => Math.random() - 0.5).slice(0, 15);
+
+    function askQuestion() {
+      let q = selectedQuestions.pop();
+      let answer = prompt(`${q.q}\nA) ${q.options[0]}\nB) ${q.options[1]}\nC) ${q.options[2]}\nD) ${q.options[3]}`);
+      if (answer && answer.toUpperCase() === "ABCD"[q.correct]) {
         alert("Resposta correta! +10 pontos");
         scores[currentTeam] += 10;
       } else {
@@ -134,3 +136,4 @@
   </script>
 </body>
 </html>
+
