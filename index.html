@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="pt">
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -62,6 +62,21 @@
       background-color: blue;
       color: white;
     }
+
+    .cell.snake {
+      background-color: green;
+      color: white;
+    }
+
+    .cell.hole {
+      background-color: black;
+      color: white;
+    }
+
+    .cell.neutral {
+      background-color: gray;
+      color: white;
+    }
   </style>
 </head>
 <body>
@@ -71,10 +86,28 @@
     const gameContainer = document.getElementById("game-container");
     const rows = 10;
     const cols = 10;
-    const bombCount = 15;
-    const flagCount = 15;
+    const questionCount = 15;
     let currentTeam = 1;
     let teamScores = { 1: 100, 2: 100 };
+
+    const questions = [
+      { q: "Em que ano o Brasil declarou guerra contra o Eixo?", a: "B", options: ["A) 1941", "B) 1942", "C) 1943", "D) 1944"] },
+      { q: "Qual era o nome da força expedicionária brasileira?", a: "C", options: ["A) Força Tática", "B) Divisão Brasileira", "C) FEB", "D) Brigada Nacional"] },
+      { q: "Qual cidade baiana foi bombardeada por submarinos alemães?", a: "D", options: ["A) Salvador", "B) Ilhéus", "C) Porto Seguro", "D) Aratu"] },
+      { q: "Quem era o presidente do Brasil durante a Segunda Guerra?", a: "A", options: ["A) Getúlio Vargas", "B) Juscelino Kubitschek", "C) João Goulart", "D) Eurico Gaspar Dutra"] },
+      { q: "Qual o lema dos pracinhas brasileiros?", a: "C", options: ["A) Avante Brasil!", "B) Morrer pela Pátria!", "C) A Cobra Vai Fumar", "D) Vitória ou Morte"] },
+      { q: "Em que país a FEB lutou?", a: "B", options: ["A) França", "B) Itália", "C) Alemanha", "D) Inglaterra"] },
+      { q: "Qual era o principal inimigo do Brasil na Segunda Guerra?", a: "D", options: ["A) Japão", "B) União Soviética", "C) França", "D) Alemanha Nazista"] },
+      { q: "Quantos soldados brasileiros lutaram na Itália?", a: "B", options: ["A) 10.000", "B) 25.000", "C) 50.000", "D) 100.000"] },
+      { q: "Qual cidade italiana foi libertada pela FEB?", a: "C", options: ["A) Roma", "B) Milão", "C) Monte Castelo", "D) Veneza"] },
+      { q: "Qual foi o impacto da guerra na Bahia?", a: "A", options: ["A) Bombardeio de navios", "B) Nenhum", "C) Invasão terrestre", "D) Conflitos internos"] },
+      { q: "Em que ano a FEB chegou à Europa?", a: "C", options: ["A) 1943", "B) 1944", "C) 1945", "D) 1946"] },
+      { q: "Quem comandava a FEB durante a Segunda Guerra?", a: "A", options: ["A) General Mascarenhas de Moraes", "B) General Dutra", "C) General Pinheiro", "D) General Vargas"] },
+      { q: "Onde o Brasil lutou em território europeu?", a: "B", options: ["A) França", "B) Itália", "C) Alemanha", "D) Polônia"] },
+      { q: "Quem foi o principal aliado do Brasil na Segunda Guerra?", a: "D", options: ["A) França", "B) Japão", "C) União Soviética", "D) Estados Unidos"] },
+      { q: "Qual batalha foi decisiva para a vitória da FEB na Segunda Guerra?", a: "A", options: ["A) Monte Castelo", "B) Stalingrado", "C) Pearl Harbor", "D) Normandia"] },
+      { q: "Quando o Brasil entrou oficialmente na Segunda Guerra Mundial?", a: "B", options: ["A) 1940", "B) 1942", "C) 1941", "D) 1943"] }
+    ];
 
     function createBoard() {
       const cells = [];
@@ -86,25 +119,22 @@
         cells.push(cell);
       }
 
+      const randomQuestions = shuffleArray(questions).slice(0, questionCount);
       let bombsPlaced = 0;
-      while (bombsPlaced < bombCount) {
-        const randomIndex = Math.floor(Math.random() * cells.length);
-        if (!cells[randomIndex].classList.contains("bomb")) {
-          cells[randomIndex].classList.add("bomb");
-          bombsPlaced++;
-        }
-      }
-
-      let flagsPlaced = 0;
-      while (flagsPlaced < flagCount) {
+      while (bombsPlaced < questionCount) {
         const randomIndex = Math.floor(Math.random() * cells.length);
         if (!cells[randomIndex].classList.contains("bomb") && !cells[randomIndex].classList.contains("flag")) {
           cells[randomIndex].classList.add("flag");
-          flagsPlaced++;
+          cells[randomIndex].dataset.question = randomQuestions[bombsPlaced].q;
+          cells[randomIndex].dataset.answer = randomQuestions[bombsPlaced].a;
+          bombsPlaced++;
         }
       }
-
       return cells;
+    }
+
+    function shuffleArray(array) {
+      return array.sort(() => Math.random() - 0.5);
     }
 
     function handleCellClick(event) {
@@ -122,23 +152,10 @@
     }
 
     function askQuestion(cell) {
-      const questions = [
-        { q: "Em que ano o Brasil declarou guerra contra o Eixo?", a: "B", options: ["A) 1941", "B) 1942", "C) 1943", "D) 1944"] },
-        { q: "Qual era o nome da força expedicionária brasileira?", a: "C", options: ["A) Força Tática", "B) Divisão Brasileira", "C) FEB", "D) Brigada Nacional"] },
-        { q: "Qual cidade baiana foi bombardeada por submarinos alemães?", a: "D", options: ["A) Salvador", "B) Ilhéus", "C) Porto Seguro", "D) Aratu"] },
-        { q: "Quem era o presidente do Brasil durante a Segunda Guerra?", a: "A", options: ["A) Getúlio Vargas", "B) Juscelino Kubitschek", "C) João Goulart", "D) Eurico Gaspar Dutra"] },
-        { q: "Qual o lema dos pracinhas brasileiros?", a: "C", options: ["A) Avante Brasil!", "B) Morrer pela Pátria!", "C) A Cobra Vai Fumar", "D) Vitória ou Morte"] },
-        { q: "Em que país a FEB lutou?", a: "B", options: ["A) França", "B) Itália", "C) Alemanha", "D) Inglaterra"] },
-        { q: "Qual era o principal inimigo do Brasil na Segunda Guerra?", a: "D", options: ["A) Japão", "B) União Soviética", "C) França", "D) Alemanha Nazista"] },
-        { q: "Quantos soldados brasileiros lutaram na Itália?", a: "B", options: ["A) 10.000", "B) 25.000", "C) 50.000", "D) 100.000"] },
-        { q: "Qual cidade italiana foi libertada pela FEB?", a: "C", options: ["A) Roma", "B) Milão", "C) Monte Castelo", "D) Veneza"] },
-        { q: "Qual foi o impacto da guerra na Bahia?", a: "A", options: ["A) Bombardeio de navios", "B) Nenhum", "C) Invasão terrestre", "D) Conflitos internos"] }
-      ];
+      const question = cell.dataset.question;
+      const answer = prompt(`${question}\nA) Resposta A\nB) Resposta B\nC) Resposta C\nD) Resposta D`);
 
-      const randomQuestion = questions[Math.floor(Math.random() * questions.length)];
-      const answer = prompt(randomQuestion.q + "\n" + randomQuestion.options.join("\n"));
-
-      if (answer && answer.toUpperCase() === randomQuestion.a) {
+      if (answer && answer.toUpperCase() === cell.dataset.answer) {
         alert("Resposta correta! +10 pontos.");
         teamScores[currentTeam] += 10;
       } else {
