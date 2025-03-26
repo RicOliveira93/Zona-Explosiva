@@ -3,24 +3,17 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Zona Explosiva</title>
+  <title>Zona Explosiva 💣</title>
   <style>
     body {
       font-family: Arial, sans-serif;
-      display: flex;
-      flex-direction: column;
-      align-items: center;
+      text-align: center;
       background-color: #282c34;
       color: white;
-      margin: 0;
-      padding: 20px;
     }
-
     h1 {
-      margin-bottom: 20px;
-      color: #ffcc00;
+      color: #ff6f61;
     }
-
     #game-container {
       display: grid;
       grid-template-columns: repeat(10, 50px);
@@ -28,177 +21,125 @@
       background-color: #444;
       padding: 10px;
       border-radius: 10px;
+      margin: auto;
+      width: fit-content;
     }
-
     .cell {
       width: 50px;
       height: 50px;
       display: flex;
-      justify-content: center;
       align-items: center;
-      font-size: 18px;
+      justify-content: center;
+      font-size: 24px;
       background-color: #61dafb;
       border-radius: 5px;
       cursor: pointer;
-      transition: transform 0.2s, background-color 0.2s;
-      color: transparent;
     }
-
-    .cell:hover {
-      transform: scale(1.1);
-    }
-
     .cell.revealed {
       background-color: #b2f7ef;
       color: black;
     }
-
-    .cell.bomb.revealed {
-      background-color: #ff0000;
-      color: white;
-    }
-
-    .cell.flag-blue.revealed {
-      background-color: #007bff;
-      color: white;
-    }
-
-    .cell.hole.revealed {
-      background-color: #333;
-      color: white;
-    }
-
-    .cell.neutral.revealed {
-      background-color: #ccc;
-      color: black;
-    }
-
-    .cell.snake.revealed {
-      background-color: #228B22;
-      color: white;
-    }
-
-    #question-box {
-      margin-top: 20px;
-      padding: 10px;
-      background-color: white;
-      color: black;
-      border-radius: 5px;
-      display: none;
-    }
-
-    #score {
-      margin-top: 10px;
-      font-size: 20px;
-    }
+    .cell.bomb.revealed { background-color: red; color: white; }
+    .cell.flag.revealed { background-color: blue; color: white; }
+    .cell.snake.revealed { background-color: green; color: white; }
+    .cell.hole.revealed { background-color: black; color: white; }
+    .cell.neutral.revealed { background-color: gray; color: white; }
+    #scoreboard { margin: 20px; }
   </style>
 </head>
 <body>
-  <h1>Zona Explosiva</h1>
-  <div id="score">Pontuação: <span id="score-value">0</span></div>
+  <h1>Zona Explosiva 💣</h1>
+  <p id="turn-indicator">Vez da Equipe 1</p>
+  <div id="scoreboard">Equipe 1: <span id="score1">100</span> | Equipe 2: <span id="score2">100</span></div>
   <div id="game-container"></div>
-  <div id="question-box">
-    <p id="question-text"></p>
-    <button onclick="checkAnswer(true)">Certo</button>
-    <button onclick="checkAnswer(false)">Errado</button>
-  </div>
-  
-  <audio id="bg-music" loop autoplay>
-    <source src="background-music.mp3" type="audio/mpeg">
-    Seu navegador não suporta a reprodução de áudio.
+  <audio id="bg-music" autoplay loop>
+    <source src="music.mp3" type="audio/mpeg">
   </audio>
-  
   <script>
+    const rows = 10, cols = 10;
     const gameContainer = document.getElementById("game-container");
-    const questionBox = document.getElementById("question-box");
-    const questionText = document.getElementById("question-text");
-    const scoreValue = document.getElementById("score-value");
-    const bgMusic = document.getElementById("bg-music");
-    const rows = 10;
-    const cols = 10;
-    let score = 0;
-    let currentCell;
+    const score1 = document.getElementById("score1");
+    const score2 = document.getElementById("score2");
+    const turnIndicator = document.getElementById("turn-indicator");
+    let currentTeam = 1;
+    let scores = {1: 100, 2: 100};
+    let cells = [];
 
-    const questions = [
-      { question: "A independência do Brasil foi proclamada em 1822?", correct: true },
-      { question: "A abolição da escravidão no Brasil ocorreu em 1888?", correct: true },
-      { question: "A Revolução Francesa começou em 1804?", correct: false },
-      { question: "Dom Pedro II foi o primeiro imperador do Brasil?", correct: false },
-      { question: "A Primeira Guerra Mundial ocorreu entre 1914 e 1918?", correct: true },
-      { question: "A Segunda Guerra Mundial terminou em 1945?", correct: true },
-      { question: "A Guerra Fria foi um conflito armado entre EUA e URSS?", correct: false },
-      { question: "O Tratado de Tordesilhas dividiu o mundo entre Espanha e Portugal?", correct: true }
-    ];
+    function switchTurn() {
+      currentTeam = currentTeam === 1 ? 2 : 1;
+      turnIndicator.innerText = `Vez da Equipe ${currentTeam}`;
+    }
 
-    function updateScore(points) {
-      score += points;
-      scoreValue.innerText = score;
+    function revealCell(cell) {
+      if (cell.classList.contains("revealed")) return;
+      cell.classList.add("revealed");
+      if (cell.classList.contains("bomb")) {
+        cell.innerHTML = "💣";
+        scores[currentTeam] -= 10;
+      } else if (cell.classList.contains("flag")) {
+        cell.innerHTML = "🚩";
+        askQuestion(cell);
+      } else if (cell.classList.contains("snake")) {
+        cell.innerHTML = "🐍";
+        // Elimina duas opções erradas (implementar lógica)
+      } else if (cell.classList.contains("hole")) {
+        cell.innerHTML = "🕳";
+        switchTurn();
+      } else if (cell.classList.contains("neutral")) {
+        cell.innerHTML = "⚪";
+      } else {
+        cell.innerHTML = "⚠";
+      }
+      updateScore();
+      switchTurn();
+    }
+
+    function updateScore() {
+      score1.innerText = scores[1];
+      score2.innerText = scores[2];
+    }
+
+    function askQuestion(cell) {
+      let questions = [
+        { q: "Quando o Brasil declarou guerra ao Eixo?", a: "A) 1942", b: "B) 1941", c: "C) 1943", d: "D) 1945", correct: "A" },
+        { q: "Qual unidade militar brasileira lutou na Itália?", a: "A) FEB", b: "B) FAB", c: "C) Marinha", d: "D) Força Expedicionária Alemã", correct: "A" },
+        { q: "Onde foi realizada a Conferência de Yalta?", a: "A) França", b: "B) EUA", c: "C) União Soviética", d: "D) Inglaterra", correct: "C" },
+        { q: "Qual foi o nome da operação que resultou na invasão da Normandia?", a: "A) Overlord", b: "B) Barbarossa", c: "C) Torch", d: "D) Husky", correct: "A" },
+        { q: "Em que ano o Brasil enviou tropas para a Itália?", a: "A) 1944", b: "B) 1943", c: "C) 1942", d: "D) 1945", correct: "B" },
+        { q: "O Brasil foi o único país da América Latina a enviar tropas para combater o Eixo?", a: "A) Sim", b: "B) Não", c: "C) Não foi", d: "D) Talvez", correct: "A" },
+        { q: "O que aconteceu em Alagoinhas durante a Segunda Guerra?", a: "A) Recebeu tropas brasileiras", b: "B) Teve uma base aérea", c: "C) Foi bombardeada", d: "D) Ninguém sabe", correct: "B" },
+        { q: "Quem foi o presidente do Brasil durante a Segunda Guerra?", a: "A) Getúlio Vargas", b: "B) Juscelino Kubitschek", c: "C) Washington Luís", d: "D) João Goulart", correct: "A" },
+        { q: "Qual foi o impacto da Segunda Guerra na economia brasileira?", a: "A) Crescimento industrial", b: "B) Queda no PIB", c: "C) Desemprego", d: "D) Aumento da inflação", correct: "A" },
+        { q: "Em que ano foi criada a Força Expedicionária Brasileira (FEB)?", a: "A) 1943", b: "B) 1944", c: "C) 1942", d: "D) 1941", correct: "A" },
+        { q: "Onde ocorreram os principais combates da FEB na Itália?", a: "A) Monte Castelo", b: "B) Montevideo", c: "C) Porto Alegre", d: "D) Roma", correct: "A" },
+        { q: "A Bahia recebeu apoio de qual país durante a Segunda Guerra?", a: "A) EUA", b: "B) Alemanha", c: "C) Itália", d: "D) Japão", correct: "A" },
+        { q: "O que foi a Batalha de Stalingrado?", a: "A) Um confronto entre EUA e Japão", b: "B) Uma batalha na França", c: "C) O maior cerco da guerra entre alemães e soviéticos", d: "D) Uma batalha na África", correct: "C" },
+        { q: "Em que ano terminou a Segunda Guerra Mundial?", a: "A) 1945", b: "B) 1944", c: "C) 1943", d: "D) 1946", correct: "A" }
+      ];
+      let q = questions[Math.floor(Math.random() * questions.length)];
+      let answer = prompt(`${q.q}\n${q.a}\n${q.b}\n${q.c}\n${q.d}`);
+      if (answer && answer.toUpperCase() === q.correct) {
+        alert("Resposta correta! +10 pontos");
+        scores[currentTeam] += 10;
+      } else {
+        alert("Errado! -5 pontos");
+        scores[currentTeam] -= 5;
+      }
+      updateScore();
     }
 
     function createBoard() {
-      const cells = [];
+      let symbols = ["bomb", "flag", "snake", "hole", "neutral"];
       for (let i = 0; i < rows * cols; i++) {
-        const cell = document.createElement("div");
+        let cell = document.createElement("div");
         cell.classList.add("cell");
-        cell.dataset.id = i;
+        if (Math.random() < 0.15) cell.classList.add(symbols[Math.floor(Math.random() * symbols.length)]);
+        cell.addEventListener("click", () => revealCell(cell));
         gameContainer.appendChild(cell);
         cells.push(cell);
       }
-
-      function placeElements(className, count, symbol) {
-        let placed = 0;
-        while (placed < count) {
-          const index = Math.floor(Math.random() * cells.length);
-          if (!cells[index].classList.contains("bomb") && !cells[index].classList.contains("flag-blue") && !cells[index].classList.contains("hole") && !cells[index].classList.contains("neutral") && !cells[index].classList.contains("snake")) {
-            cells[index].classList.add(className);
-            cells[index].dataset.symbol = symbol;
-            placed++;
-          }
-        }
-      }
-
-      placeElements("bomb", 15, "💣");
-      placeElements("flag-blue", 15, "🚩");
-      placeElements("hole", 5, "🕳️");
-      placeElements("neutral", 4, "⚪");
-      placeElements("snake", 4, "🐍");
-
-      return cells;
     }
-
-    function handleCellClick(event) {
-      currentCell = event.target;
-      if (currentCell.classList.contains("revealed")) return;
-      currentCell.classList.add("revealed");
-      
-      if (currentCell.classList.contains("bomb")) {
-        currentCell.innerHTML = "💣";
-        alert("Game Over!");
-      } else if (currentCell.classList.contains("flag-blue")) {
-        currentCell.innerHTML = "🚩";
-        let randomQuestion = questions[Math.floor(Math.random() * questions.length)];
-        questionBox.style.display = "block";
-        questionText.innerText = randomQuestion.question;
-        currentCell.dataset.correct = randomQuestion.correct;
-      }
-    }
-
-    function checkAnswer(answer) {
-      questionBox.style.display = "none";
-      if (answer.toString() === currentCell.dataset.correct) {
-        updateScore(10);
-        alert("Resposta correta! +10 pontos");
-      } else {
-        updateScore(-5);
-        alert("Resposta errada! -5 pontos");
-      }
-    }
-
-    const cells = createBoard();
-    cells.forEach((cell) => cell.addEventListener("click", handleCellClick));
+    createBoard();
   </script>
 </body>
 </html>
-
-
-
