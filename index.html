@@ -7,13 +7,25 @@
   <style>
     body {
       font-family: Arial, sans-serif;
-      text-align: center;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
       background-color: #282c34;
       color: white;
+      margin: 0;
+      padding: 20px;
     }
+
     h1 {
       color: #ff6f61;
     }
+
+    #scoreboard {
+      margin-bottom: 20px;
+      font-size: 18px;
+      color: #ff6f61;
+    }
+
     #game-container {
       display: grid;
       grid-template-columns: repeat(10, 50px);
@@ -21,125 +33,128 @@
       background-color: #444;
       padding: 10px;
       border-radius: 10px;
-      margin: auto;
-      width: fit-content;
     }
+
     .cell {
       width: 50px;
       height: 50px;
       display: flex;
-      align-items: center;
       justify-content: center;
+      align-items: center;
       font-size: 24px;
       background-color: #61dafb;
       border-radius: 5px;
       cursor: pointer;
+      transition: background-color 0.2s;
     }
+
     .cell.revealed {
       background-color: #b2f7ef;
       color: black;
     }
-    .cell.bomb.revealed { background-color: red; color: white; }
-    .cell.flag.revealed { background-color: blue; color: white; }
-    .cell.snake.revealed { background-color: green; color: white; }
-    .cell.hole.revealed { background-color: black; color: white; }
-    .cell.neutral.revealed { background-color: gray; color: white; }
-    #scoreboard { margin: 20px; }
+
+    .bomb.revealed {
+      background-color: #ff6f61;
+      color: white;
+    }
+
+    .flag {
+      background-color: blue;
+      color: white;
+    }
   </style>
 </head>
 <body>
   <h1>Zona Explosiva 💣</h1>
-  <p id="turn-indicator">Vez da Equipe 1</p>
-  <div id="scoreboard">Equipe 1: <span id="score1">100</span> | Equipe 2: <span id="score2">100</span></div>
+  <div id="scoreboard">
+    <div>Equipe 1: <span id="team1-score">100</span> pontos</div>
+    <div>Equipe 2: <span id="team2-score">100</span> pontos</div>
+  </div>
   <div id="game-container"></div>
-  <audio id="bg-music" autoplay loop>
-    <source src="music.mp3" type="audio/mpeg">
-  </audio>
   <script>
-    const rows = 10, cols = 10;
     const gameContainer = document.getElementById("game-container");
-    const score1 = document.getElementById("score1");
-    const score2 = document.getElementById("score2");
-    const turnIndicator = document.getElementById("turn-indicator");
+    const team1ScoreElement = document.getElementById("team1-score");
+    const team2ScoreElement = document.getElementById("team2-score");
+    const rows = 10;
+    const cols = 10;
+    const questionCount = 15;
     let currentTeam = 1;
-    let scores = {1: 100, 2: 100};
-    let cells = [];
+    let teamScores = { 1: 100, 2: 100 };
 
-    function switchTurn() {
-      currentTeam = currentTeam === 1 ? 2 : 1;
-      turnIndicator.innerText = `Vez da Equipe ${currentTeam}`;
-    }
-
-    function revealCell(cell) {
-      if (cell.classList.contains("revealed")) return;
-      cell.classList.add("revealed");
-      if (cell.classList.contains("bomb")) {
-        cell.innerHTML = "💣";
-        scores[currentTeam] -= 10;
-      } else if (cell.classList.contains("flag")) {
-        cell.innerHTML = "🚩";
-        askQuestion(cell);
-      } else if (cell.classList.contains("snake")) {
-        cell.innerHTML = "🐍";
-        // Elimina duas opções erradas (implementar lógica)
-      } else if (cell.classList.contains("hole")) {
-        cell.innerHTML = "🕳";
-        switchTurn();
-      } else if (cell.classList.contains("neutral")) {
-        cell.innerHTML = "⚪";
-      } else {
-        cell.innerHTML = "⚠";
-      }
-      updateScore();
-      switchTurn();
-    }
-
-    function updateScore() {
-      score1.innerText = scores[1];
-      score2.innerText = scores[2];
-    }
-
-    function askQuestion(cell) {
-      let questions = [
-        { q: "Quando o Brasil declarou guerra ao Eixo?", a: "A) 1942", b: "B) 1941", c: "C) 1943", d: "D) 1945", correct: "A" },
-        { q: "Qual unidade militar brasileira lutou na Itália?", a: "A) FEB", b: "B) FAB", c: "C) Marinha", d: "D) Força Expedicionária Alemã", correct: "A" },
-        { q: "Onde foi realizada a Conferência de Yalta?", a: "A) França", b: "B) EUA", c: "C) União Soviética", d: "D) Inglaterra", correct: "C" },
-        { q: "Qual foi o nome da operação que resultou na invasão da Normandia?", a: "A) Overlord", b: "B) Barbarossa", c: "C) Torch", d: "D) Husky", correct: "A" },
-        { q: "Em que ano o Brasil enviou tropas para a Itália?", a: "A) 1944", b: "B) 1943", c: "C) 1942", d: "D) 1945", correct: "B" },
-        { q: "O Brasil foi o único país da América Latina a enviar tropas para combater o Eixo?", a: "A) Sim", b: "B) Não", c: "C) Não foi", d: "D) Talvez", correct: "A" },
-        { q: "O que aconteceu em Alagoinhas durante a Segunda Guerra?", a: "A) Recebeu tropas brasileiras", b: "B) Teve uma base aérea", c: "C) Foi bombardeada", d: "D) Ninguém sabe", correct: "B" },
-        { q: "Quem foi o presidente do Brasil durante a Segunda Guerra?", a: "A) Getúlio Vargas", b: "B) Juscelino Kubitschek", c: "C) Washington Luís", d: "D) João Goulart", correct: "A" },
-        { q: "Qual foi o impacto da Segunda Guerra na economia brasileira?", a: "A) Crescimento industrial", b: "B) Queda no PIB", c: "C) Desemprego", d: "D) Aumento da inflação", correct: "A" },
-        { q: "Em que ano foi criada a Força Expedicionária Brasileira (FEB)?", a: "A) 1943", b: "B) 1944", c: "C) 1942", d: "D) 1941", correct: "A" },
-        { q: "Onde ocorreram os principais combates da FEB na Itália?", a: "A) Monte Castelo", b: "B) Montevideo", c: "C) Porto Alegre", d: "D) Roma", correct: "A" },
-        { q: "A Bahia recebeu apoio de qual país durante a Segunda Guerra?", a: "A) EUA", b: "B) Alemanha", c: "C) Itália", d: "D) Japão", correct: "A" },
-        { q: "O que foi a Batalha de Stalingrado?", a: "A) Um confronto entre EUA e Japão", b: "B) Uma batalha na França", c: "C) O maior cerco da guerra entre alemães e soviéticos", d: "D) Uma batalha na África", correct: "C" },
-        { q: "Em que ano terminou a Segunda Guerra Mundial?", a: "A) 1945", b: "B) 1944", c: "C) 1943", d: "D) 1946", correct: "A" }
-      ];
-      let q = questions[Math.floor(Math.random() * questions.length)];
-      let answer = prompt(`${q.q}\n${q.a}\n${q.b}\n${q.c}\n${q.d}`);
-      if (answer && answer.toUpperCase() === q.correct) {
-        alert("Resposta correta! +10 pontos");
-        scores[currentTeam] += 10;
-      } else {
-        alert("Errado! -5 pontos");
-        scores[currentTeam] -= 5;
-      }
-      updateScore();
-    }
+    const questions = [
+      { q: "Em que ano o Brasil declarou guerra contra o Eixo?", a: "B" },
+      { q: "Qual era o nome da força expedicionária brasileira?", a: "C" },
+      { q: "Qual cidade baiana foi bombardeada por submarinos alemães?", a: "D" },
+      { q: "Quem era o presidente do Brasil durante a Segunda Guerra?", a: "A" },
+      { q: "Qual o lema dos pracinhas brasileiros?", a: "C" },
+      { q: "Em que país a FEB lutou?", a: "B" },
+      { q: "Qual era o principal inimigo do Brasil na Segunda Guerra?", a: "D" },
+      { q: "Quantos soldados brasileiros lutaram na Itália?", a: "B" },
+      { q: "Qual cidade italiana foi libertada pela FEB?", a: "C" },
+      { q: "Qual foi o impacto da guerra na Bahia?", a: "A" },
+      { q: "Em que ano a FEB chegou à Europa?", a: "C" },
+      { q: "Quem comandava a FEB durante a Segunda Guerra?", a: "A" },
+      { q: "Onde o Brasil lutou em território europeu?", a: "B" },
+      { q: "Quem foi o principal aliado do Brasil na Segunda Guerra?", a: "D" },
+      { q: "Qual batalha foi decisiva para a vitória da FEB na Segunda Guerra?", a: "A" }
+    ];
 
     function createBoard() {
-      let symbols = ["bomb", "flag", "snake", "hole", "neutral"];
+      const cells = [];
       for (let i = 0; i < rows * cols; i++) {
-        let cell = document.createElement("div");
+        const cell = document.createElement("div");
         cell.classList.add("cell");
-        if (Math.random() < 0.15) cell.classList.add(symbols[Math.floor(Math.random() * symbols.length)]);
-        cell.addEventListener("click", () => revealCell(cell));
+        cell.dataset.id = i;
         gameContainer.appendChild(cell);
         cells.push(cell);
       }
+
+      const randomQuestions = questions.sort(() => Math.random() - 0.5).slice(0, questionCount);
+      let placed = 0;
+      while (placed < questionCount) {
+        const index = Math.floor(Math.random() * cells.length);
+        if (!cells[index].classList.contains("flag")) {
+          cells[index].classList.add("flag");
+          cells[index].dataset.question = randomQuestions[placed].q;
+          cells[index].dataset.answer = randomQuestions[placed].a;
+          placed++;
+        }
+      }
+      return cells;
     }
-    createBoard();
+
+    function handleCellClick(event) {
+      const cell = event.target;
+      if (cell.classList.contains("revealed")) return;
+
+      cell.classList.add("revealed");
+      if (cell.classList.contains("flag")) {
+        askQuestion(cell);
+      }
+    }
+
+    function askQuestion(cell) {
+      const question = cell.dataset.question;
+      const answer = prompt(`${question}\nA) Resposta A\nB) Resposta B\nC) Resposta C\nD) Resposta D`);
+      if (answer && answer.toUpperCase() === cell.dataset.answer) {
+        alert("Resposta correta! +10 pontos.");
+        teamScores[currentTeam] += 10;
+      } else {
+        alert("Resposta errada! -5 pontos.");
+        teamScores[currentTeam] -= 5;
+      }
+      updateScoreboard();
+      currentTeam = currentTeam === 1 ? 2 : 1;
+    }
+
+    function updateScoreboard() {
+      team1ScoreElement.textContent = teamScores[1];
+      team2ScoreElement.textContent = teamScores[2];
+    }
+
+    const cells = createBoard();
+    cells.forEach((cell) => cell.addEventListener("click", handleCellClick));
   </script>
 </body>
 </html>
+
