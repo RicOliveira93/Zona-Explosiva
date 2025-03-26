@@ -21,6 +21,15 @@
       color: #ff6f61;
     }
 
+    #scoreboard {
+      display: flex;
+      justify-content: space-around;
+      width: 100%;
+      max-width: 400px;
+      margin-bottom: 20px;
+      font-size: 20px;
+    }
+
     #game-container {
       display: grid;
       grid-template-columns: repeat(10, 50px);
@@ -62,35 +71,25 @@
       background-color: blue;
       color: white;
     }
-
-    .cell.empty.revealed {
-      background-color: #cccccc;
-      color: black;
-    }
-
-    #scoreboard {
-      margin-top: 20px;
-      font-size: 20px;
-    }
   </style>
 </head>
 <body>
   <h1>Zona Explosiva 💣</h1>
-  <div id="scoreboard">Equipe 1: 100 | Equipe 2: 100</div>
+  <div id="scoreboard">
+    <div>Equipe 1: <span id="score1">100</span> pontos</div>
+    <div>Equipe 2: <span id="score2">100</span> pontos</div>
+  </div>
   <div id="game-container"></div>
   <script>
     const gameContainer = document.getElementById("game-container");
-    const scoreboard = document.getElementById("scoreboard");
+    const score1 = document.getElementById("score1");
+    const score2 = document.getElementById("score2");
     const rows = 10;
     const cols = 10;
     const bombCount = 10;
-    const flagCount = 15;
+    const questionCount = 15;
     let currentTeam = 1;
     let teamScores = { 1: 100, 2: 100 };
-
-    function updateScoreboard() {
-      scoreboard.textContent = `Equipe 1: ${teamScores[1]} | Equipe 2: ${teamScores[2]}`;
-    }
 
     function createBoard() {
       const cells = [];
@@ -107,27 +106,27 @@
         const randomIndex = Math.floor(Math.random() * cells.length);
         if (!cells[randomIndex].classList.contains("bomb")) {
           cells[randomIndex].classList.add("bomb");
-          cells[randomIndex].textContent = "💣";
+          cells[randomIndex].dataset.type = "💣";
           bombsPlaced++;
         }
       }
 
-      let flagsPlaced = 0;
-      while (flagsPlaced < flagCount) {
+      let questionsPlaced = 0;
+      while (questionsPlaced < questionCount) {
         const randomIndex = Math.floor(Math.random() * cells.length);
         if (!cells[randomIndex].classList.contains("bomb") && !cells[randomIndex].classList.contains("flag")) {
           cells[randomIndex].classList.add("flag");
-          cells[randomIndex].textContent = "🚩";
-          flagsPlaced++;
+          cells[randomIndex].dataset.type = "🚩";
+          questionsPlaced++;
         }
       }
 
       cells.forEach(cell => {
-        if (!cell.classList.contains("bomb") && !cell.classList.contains("flag")) {
-          cell.classList.add("empty");
-          cell.textContent = "⚠️";
+        if (!cell.dataset.type) {
+          cell.dataset.type = "⚠️";
         }
       });
+
       return cells;
     }
 
@@ -136,9 +135,10 @@
       if (cell.classList.contains("revealed")) return;
 
       cell.classList.add("revealed");
+      cell.textContent = cell.dataset.type;
 
       if (cell.classList.contains("bomb")) {
-        alert("Game Over!");
+        alert("Game Over! A bomba explodiu!");
       } else if (cell.classList.contains("flag")) {
         askQuestion(cell);
       }
@@ -148,29 +148,28 @@
       const questions = [
         { q: "Em que ano o Brasil declarou guerra contra o Eixo?", a: "B", options: ["A) 1941", "B) 1942", "C) 1943", "D) 1944"] },
         { q: "Qual era o nome da força expedicionária brasileira?", a: "C", options: ["A) Força Tática", "B) Divisão Brasileira", "C) FEB", "D) Brigada Nacional"] },
-        { q: "Qual cidade baiana foi bombardeada por submarinos alemães?", a: "D", options: ["A) Salvador", "B) Ilhéus", "C) Porto Seguro", "D) Aratu"] }
+        { q: "Qual cidade baiana foi bombardeada por submarinos alemães?", a: "D", options: ["A) Salvador", "B) Ilhéus", "C) Porto Seguro", "D) Aratu"] },
+        { q: "Quem era o presidente do Brasil durante a Segunda Guerra?", a: "A", options: ["A) Getúlio Vargas", "B) Juscelino Kubitschek", "C) João Goulart", "D) Eurico Gaspar Dutra"] },
+        { q: "Qual o lema dos pracinhas brasileiros?", a: "C", options: ["A) Avante Brasil!", "B) Morrer pela Pátria!", "C) A Cobra Vai Fumar", "D) Vitória ou Morte"] }
       ];
 
-      const questionSet = questions.sort(() => Math.random() - 0.5).slice(0, 15);
-      const currentQuestion = questionSet.pop();
-      
-      const answer = prompt(currentQuestion.q + "\n" + currentQuestion.options.join("\n"));
-      
-      if (answer && answer.toUpperCase() === currentQuestion.a) {
+      const randomQuestion = questions[Math.floor(Math.random() * questions.length)];
+      const answer = prompt(randomQuestion.q + "\n" + randomQuestion.options.join("\n"));
+
+      if (answer && answer.toUpperCase() === randomQuestion.a) {
         alert("Resposta correta! +10 pontos.");
         teamScores[currentTeam] += 10;
       } else {
         alert("Resposta errada! -5 pontos.");
         teamScores[currentTeam] -= 5;
       }
-
-      updateScoreboard();
+      score1.textContent = teamScores[1];
+      score2.textContent = teamScores[2];
       currentTeam = currentTeam === 1 ? 2 : 1;
     }
 
     const cells = createBoard();
-    cells.forEach((cell) => cell.addEventListener("click", handleCellClick));
-    updateScoreboard();
+    cells.forEach(cell => cell.addEventListener("click", handleCellClick));
   </script>
 </body>
 </html>
