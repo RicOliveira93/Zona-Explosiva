@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html lang="pt">
+<html lang="en">
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -17,12 +17,7 @@
     }
 
     h1 {
-      color: #ff6f61;
-    }
-
-    #scoreboard {
       margin-bottom: 20px;
-      font-size: 18px;
       color: #ff6f61;
     }
 
@@ -45,7 +40,12 @@
       background-color: #61dafb;
       border-radius: 5px;
       cursor: pointer;
-      transition: background-color 0.2s;
+      transition: transform 0.2s, background-color 0.2s;
+      color: transparent;
+    }
+
+    .cell:hover {
+      transform: scale(1.1);
     }
 
     .cell.revealed {
@@ -53,51 +53,44 @@
       color: black;
     }
 
-    .bomb.revealed {
+    .cell.bomb.revealed {
       background-color: #ff6f61;
       color: white;
     }
 
-    .flag {
+    .cell.flag.revealed {
       background-color: blue;
       color: white;
+    }
+
+    .cell.empty.revealed {
+      background-color: #cccccc;
+      color: black;
+    }
+
+    #scoreboard {
+      margin-top: 20px;
+      font-size: 20px;
     }
   </style>
 </head>
 <body>
   <h1>Zona Explosiva 💣</h1>
-  <div id="scoreboard">
-    <div>Equipe 1: <span id="team1-score">100</span> pontos</div>
-    <div>Equipe 2: <span id="team2-score">100</span> pontos</div>
-  </div>
+  <div id="scoreboard">Equipe 1: 100 | Equipe 2: 100</div>
   <div id="game-container"></div>
   <script>
     const gameContainer = document.getElementById("game-container");
-    const team1ScoreElement = document.getElementById("team1-score");
-    const team2ScoreElement = document.getElementById("team2-score");
+    const scoreboard = document.getElementById("scoreboard");
     const rows = 10;
     const cols = 10;
-    const questionCount = 15;
+    const bombCount = 10;
+    const flagCount = 15;
     let currentTeam = 1;
     let teamScores = { 1: 100, 2: 100 };
 
-    const questions = [
-      { q: "Em que ano o Brasil declarou guerra contra o Eixo?", a: "B" },
-      { q: "Qual era o nome da força expedicionária brasileira?", a: "C" },
-      { q: "Qual cidade baiana foi bombardeada por submarinos alemães?", a: "D" },
-      { q: "Quem era o presidente do Brasil durante a Segunda Guerra?", a: "A" },
-      { q: "Qual o lema dos pracinhas brasileiros?", a: "C" },
-      { q: "Em que país a FEB lutou?", a: "B" },
-      { q: "Qual era o principal inimigo do Brasil na Segunda Guerra?", a: "D" },
-      { q: "Quantos soldados brasileiros lutaram na Itália?", a: "B" },
-      { q: "Qual cidade italiana foi libertada pela FEB?", a: "C" },
-      { q: "Qual foi o impacto da guerra na Bahia?", a: "A" },
-      { q: "Em que ano a FEB chegou à Europa?", a: "C" },
-      { q: "Quem comandava a FEB durante a Segunda Guerra?", a: "A" },
-      { q: "Onde o Brasil lutou em território europeu?", a: "B" },
-      { q: "Quem foi o principal aliado do Brasil na Segunda Guerra?", a: "D" },
-      { q: "Qual batalha foi decisiva para a vitória da FEB na Segunda Guerra?", a: "A" }
-    ];
+    function updateScoreboard() {
+      scoreboard.textContent = `Equipe 1: ${teamScores[1]} | Equipe 2: ${teamScores[2]}`;
+    }
 
     function createBoard() {
       const cells = [];
@@ -109,17 +102,32 @@
         cells.push(cell);
       }
 
-      const randomQuestions = questions.sort(() => Math.random() - 0.5).slice(0, questionCount);
-      let placed = 0;
-      while (placed < questionCount) {
-        const index = Math.floor(Math.random() * cells.length);
-        if (!cells[index].classList.contains("flag")) {
-          cells[index].classList.add("flag");
-          cells[index].dataset.question = randomQuestions[placed].q;
-          cells[index].dataset.answer = randomQuestions[placed].a;
-          placed++;
+      let bombsPlaced = 0;
+      while (bombsPlaced < bombCount) {
+        const randomIndex = Math.floor(Math.random() * cells.length);
+        if (!cells[randomIndex].classList.contains("bomb")) {
+          cells[randomIndex].classList.add("bomb");
+          cells[randomIndex].textContent = "💣";
+          bombsPlaced++;
         }
       }
+
+      let flagsPlaced = 0;
+      while (flagsPlaced < flagCount) {
+        const randomIndex = Math.floor(Math.random() * cells.length);
+        if (!cells[randomIndex].classList.contains("bomb") && !cells[randomIndex].classList.contains("flag")) {
+          cells[randomIndex].classList.add("flag");
+          cells[randomIndex].textContent = "🚩";
+          flagsPlaced++;
+        }
+      }
+
+      cells.forEach(cell => {
+        if (!cell.classList.contains("bomb") && !cell.classList.contains("flag")) {
+          cell.classList.add("empty");
+          cell.textContent = "⚠️";
+        }
+      });
       return cells;
     }
 
@@ -128,33 +136,41 @@
       if (cell.classList.contains("revealed")) return;
 
       cell.classList.add("revealed");
-      if (cell.classList.contains("flag")) {
+
+      if (cell.classList.contains("bomb")) {
+        alert("Game Over!");
+      } else if (cell.classList.contains("flag")) {
         askQuestion(cell);
       }
     }
 
     function askQuestion(cell) {
-      const question = cell.dataset.question;
-      const answer = prompt(`${question}\nA) Resposta A\nB) Resposta B\nC) Resposta C\nD) Resposta D`);
-      if (answer && answer.toUpperCase() === cell.dataset.answer) {
+      const questions = [
+        { q: "Em que ano o Brasil declarou guerra contra o Eixo?", a: "B", options: ["A) 1941", "B) 1942", "C) 1943", "D) 1944"] },
+        { q: "Qual era o nome da força expedicionária brasileira?", a: "C", options: ["A) Força Tática", "B) Divisão Brasileira", "C) FEB", "D) Brigada Nacional"] },
+        { q: "Qual cidade baiana foi bombardeada por submarinos alemães?", a: "D", options: ["A) Salvador", "B) Ilhéus", "C) Porto Seguro", "D) Aratu"] }
+      ];
+
+      const questionSet = questions.sort(() => Math.random() - 0.5).slice(0, 15);
+      const currentQuestion = questionSet.pop();
+      
+      const answer = prompt(currentQuestion.q + "\n" + currentQuestion.options.join("\n"));
+      
+      if (answer && answer.toUpperCase() === currentQuestion.a) {
         alert("Resposta correta! +10 pontos.");
         teamScores[currentTeam] += 10;
       } else {
         alert("Resposta errada! -5 pontos.");
         teamScores[currentTeam] -= 5;
       }
+
       updateScoreboard();
       currentTeam = currentTeam === 1 ? 2 : 1;
     }
 
-    function updateScoreboard() {
-      team1ScoreElement.textContent = teamScores[1];
-      team2ScoreElement.textContent = teamScores[2];
-    }
-
     const cells = createBoard();
     cells.forEach((cell) => cell.addEventListener("click", handleCellClick));
+    updateScoreboard();
   </script>
 </body>
 </html>
-
